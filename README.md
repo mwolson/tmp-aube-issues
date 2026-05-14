@@ -15,5 +15,5 @@ existing npm and Bun projects.
   points to the workspace root instead of `packages/contracts`.
   Upstream discussion: https://github.com/endevco/aube/discussions/691
 
-Each case has a `repro.sh` script that exits non-zero when the bug is not
-observed.
+Each case has a `repro.sh` script that exits zero when aube behaves correctly
+and non-zero when the issue is observed.

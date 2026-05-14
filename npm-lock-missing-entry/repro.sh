@@ -9,28 +9,35 @@ fi
 rm -rf node_modules
 aube install --fix-lockfile --ignore-scripts --reporter append-only
 
-node <<'NODE'
+failures=0
+
+if ! node <<'NODE'
 const fs = require("fs");
 const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
 
 if (lock.packages[""]?.dependencies?.["expo-router"] !== "~4.0.21") {
-  console.error("expected aube to add the root expo-router dependency spec");
+  console.error("failed: aube did not add the root expo-router dependency spec");
   process.exit(1);
 }
 
-if (lock.packages["node_modules/expo-router"]) {
-  console.error("bug not reproduced: package-lock.json contains node_modules/expo-router");
+if (!lock.packages["node_modules/expo-router"]) {
+  console.error("failed: package-lock.json is missing packages[\"node_modules/expo-router\"]");
   process.exit(1);
 }
 
-console.log("reproduced: package-lock.json is missing packages[\"node_modules/expo-router\"]");
+console.log("pass: package-lock.json contains packages[\"node_modules/expo-router\"]");
 NODE
+then
+    failures=1
+fi
 
 aube ci --ignore-scripts --reporter append-only
 
-if [[ -e node_modules/expo-router ]]; then
-    echo "bug not reproduced: clean frozen install linked expo-router" >&2
-    exit 1
+if [[ ! -e node_modules/expo-router ]]; then
+    echo "failed: clean frozen install omitted node_modules/expo-router" >&2
+    failures=1
+else
+    echo "pass: clean frozen install linked node_modules/expo-router"
 fi
 
-echo "reproduced: clean frozen install omitted node_modules/expo-router"
+exit "$failures"

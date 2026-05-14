@@ -12,10 +12,10 @@ aube install --frozen-lockfile --reporter append-only
 actual="$(realpath packages/app/node_modules/@repro/contracts)"
 expected="$(realpath packages/contracts)"
 
-if [[ "$actual" == "$expected" ]]; then
-    echo "bug not reproduced: workspace symlink points to $actual" >&2
+if [[ "$actual" != "$expected" ]]; then
+    echo "failed: packages/app/node_modules/@repro/contracts points to $actual" >&2
+    echo "expected: $expected" >&2
     exit 1
 fi
 
-echo "reproduced: packages/app/node_modules/@repro/contracts points to $actual"
-echo "expected: $expected"
+echo "pass: workspace symlink points to $actual"
