@@ -1,0 +1,17 @@
+# aube issue repros
+
+Minimal repros for aube 1.13.1 compatibility issues found while testing
+existing npm and Bun projects.
+
+## Cases
+
+- `npm-lock-missing-entry`: aube repairs a stale npm `package-lock.json` by
+  adding the root `expo-router` dependency spec, but it does not add
+  `packages["node_modules/expo-router"]`. A clean frozen aube install then
+  omits `node_modules/expo-router`.
+- `bun-workspace-link`: aube installs from Bun's text `bun.lock`, but a
+  workspace dependency symlink inside `packages/app` points to the workspace
+  root instead of `packages/contracts`.
+
+Each case has a `repro.sh` script that exits non-zero when the bug is not
+observed.
