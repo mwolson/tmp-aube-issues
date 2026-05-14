@@ -1,6 +1,6 @@
 # aube issue repros
 
-Minimal repros for aube 1.13.1 compatibility issues found while testing
+Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
 ## Cases
