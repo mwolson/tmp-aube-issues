@@ -13,11 +13,6 @@ existing npm and Bun projects.
   docs do not mention Bun's top-level field.
   Docs: https://aube.en.dev/package-manager/configuration,
   https://aube.en.dev/bun-users
-- `install-omit-optional` (observed with aube `1.14.1`): aube rejects
-  `aube install --omit optional` with an unexpected argument error. This blocks
-  npm/Bun-compatible production install commands that use `--omit optional`;
-  aube's documented equivalent is `--no-optional`.
-  Docs: https://aube.en.dev/package-manager/install
 
 ## Fixed
 
@@ -35,6 +30,16 @@ existing npm and Bun projects.
   text `bun.lock`, but a workspace dependency symlink inside `packages/app`
   points to the workspace root instead of `packages/contracts`.
   Upstream discussion: https://github.com/endevco/aube/discussions/691
+
+## Mitigated
+
+- `install-omit-optional` (observed with aube `1.14.1`): aube rejects
+  `aube install --omit optional` with an unexpected argument error. This blocks
+  npm/Bun-compatible production install commands that use `--omit optional`;
+  aube's documented equivalent is `--no-optional`. Mitigated in aubeshim
+  `0.5.0`, which translates npm/Bun `--omit optional` to aube `--no-optional`
+  and npm/Bun `--omit dev` to aube `--prod`.
+  Docs: https://aube.en.dev/package-manager/install
 
 Each case has a `repro.sh` script that exits zero when aube behaves correctly
 and non-zero when the issue is observed.
