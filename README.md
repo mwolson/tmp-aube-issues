@@ -27,6 +27,7 @@ existing npm and Bun projects.
   Docs: https://aube.en.dev/package-manager/node-modules,
   https://aube.en.dev/package-manager/lockfiles,
   https://aube.en.dev/troubleshooting
+  Upstream discussion: https://github.com/endevco/aube/discussions/725
 - [`yarn-scoped-dependency-linking`](yarn-scoped-dependency-linking) (observed
   with aube `1.14.1`): aube installs from a Yarn v1 `yarn.lock`, but the
   materialized dependency tree does not make `@rollup/plugin-replace`'s
