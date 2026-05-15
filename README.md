@@ -5,6 +5,14 @@ existing npm and Bun projects.
 
 ## Open
 
+- `bun-patched-dependencies` (observed with aube `1.14.1`): aube installs
+  from Bun's text `bun.lock`, but it does not apply Bun's top-level
+  `patchedDependencies` manifest field. Native Bun applies the patch from the
+  same manifest and lockfile. Aube documents patch support through
+  `aube.patchedDependencies` / `pnpm.patchedDependencies`, but the Bun rollout
+  docs do not mention Bun's top-level field.
+  Docs: https://aube.en.dev/package-manager/configuration,
+  https://aube.en.dev/bun-users
 - `install-omit-optional` (observed with aube `1.14.1`): aube rejects
   `aube install --omit optional` with an unexpected argument error. This blocks
   npm/Bun-compatible production install commands that use `--omit optional`;
