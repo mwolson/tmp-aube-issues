@@ -1,0 +1,8 @@
+{
+  "name": "aube-install-omit-optional",
+  "version": "0.0.0",
+  "private": true,
+  "optionalDependencies": {
+    "is-odd": "3.0.1"
+  }
+}

@@ -3,9 +3,18 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
-## Cases
+## Open
 
-- `npm-lock-missing-entry` (observed with aube `1.14.0`): aube repairs a stale
+- `install-omit-optional` (observed with aube `1.14.1`): aube rejects
+  `aube install --omit optional` with an unexpected argument error. This blocks
+  npm/Bun-compatible production install commands that use `--omit optional`;
+  aube's documented equivalent is `--no-optional`.
+  Docs: https://aube.en.dev/package-manager/install
+
+## Fixed
+
+- `npm-lock-missing-entry` (observed with aube `1.14.0`, fixed in aube
+  `1.14.1`): aube repairs a stale
   npm `package-lock.json` by adding the root `expo-router` dependency spec,
   but it does not add `packages["node_modules/expo-router"]`. A clean frozen
   aube install then omits `node_modules/expo-router`. The stale npm lock was
@@ -13,7 +22,8 @@ existing npm and Bun projects.
   added, using `npm install --package-lock-only --ignore-scripts --no-audit
   --no-fund`.
   Upstream discussion: https://github.com/endevco/aube/discussions/690
-- `bun-workspace-link` (observed with aube `1.13.1`): aube installs from Bun's
+- `bun-workspace-link` (observed with aube `1.13.1`, fixed in aube `1.14.1`):
+  aube installs from Bun's
   text `bun.lock`, but a workspace dependency symlink inside `packages/app`
   points to the workspace root instead of `packages/contracts`.
   Upstream discussion: https://github.com/endevco/aube/discussions/691
