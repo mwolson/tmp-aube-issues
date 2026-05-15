@@ -5,10 +5,12 @@ existing npm and Bun projects.
 
 ## Cases
 
-- `npm-lock-missing-entry` (observed with aube `1.13.1`): aube repairs a stale
+- `npm-lock-missing-entry` (observed with aube `1.14.0`): aube repairs a stale
   npm `package-lock.json` by adding the root `expo-router` dependency spec,
   but it does not add `packages["node_modules/expo-router"]`. A clean frozen
-  aube install then omits `node_modules/expo-router`.
+  aube install then omits `node_modules/expo-router`. The stale npm lock was
+  produced by npm `11.14.1` from the same manifest before `expo-router` was
+  added.
   Upstream discussion: https://github.com/endevco/aube/discussions/690
 - `bun-workspace-link` (observed with aube `1.13.1`): aube installs from Bun's
   text `bun.lock`, but a workspace dependency symlink inside `packages/app`
