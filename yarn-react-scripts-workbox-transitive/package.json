@@ -1,0 +1,7 @@
+{
+  "name": "yarn-react-scripts-workbox-transitive",
+  "private": true,
+  "dependencies": {
+    "react-scripts": "5.0.0"
+  }
+}

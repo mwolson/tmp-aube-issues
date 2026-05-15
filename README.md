@@ -13,6 +13,15 @@ existing npm and Bun projects.
   docs do not mention Bun's top-level field.
   Docs: https://aube.en.dev/package-manager/configuration,
   https://aube.en.dev/bun-users
+- `yarn-react-scripts-workbox-transitive` (observed with aube `1.14.1`):
+  aube installs from a Yarn v1 `yarn.lock`, but the materialized dependency
+  tree does not make `workbox-build`'s declared dependency
+  `@apideck/better-ajv-errors` resolvable from `workbox-build`. Native Yarn
+  v1.22.22 installs the same lockfile with that dependency resolvable. This was
+  reduced from a `react-scripts@5.0.0` build failure through
+  `workbox-webpack-plugin@6.6.1`.
+  Docs: https://aube.en.dev/package-manager/lockfiles,
+  https://aube.en.dev/troubleshooting
 
 ## Fixed
 
