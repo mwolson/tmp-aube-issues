@@ -1,7 +1,0 @@
-{
-  "name": "yarn-workbox-build-transitive",
-  "private": true,
-  "dependencies": {
-    "workbox-build": "6.6.1"
-  }
-}

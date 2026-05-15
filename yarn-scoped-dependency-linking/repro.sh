@@ -24,23 +24,22 @@ fi
 
 cd "$(dirname "$0")"
 
-check_workbox_transitive() {
+check_scoped_dependency() {
     node <<'NODE'
-const validateOptions = require.resolve("workbox-build/build/lib/validate-options.js");
-require.resolve("@apideck/better-ajv-errors", { paths: [validateOptions] });
+require("@rollup/plugin-replace");
 NODE
 }
 
 rm -rf node_modules
 "$YARN_BIN" install --frozen-lockfile --ignore-scripts
-if ! check_workbox_transitive; then
-    echo "native Yarn did not make workbox-build's declared dependency resolvable" >&2
+if ! check_scoped_dependency; then
+    echo "native Yarn did not make @rollup/plugin-replace's declared dependency resolvable" >&2
     exit 2
 fi
 
 rm -rf node_modules
-aube install --frozen-lockfile --ignore-scripts --reporter append-only
-if ! check_workbox_transitive; then
-    echo "aube did not make workbox-build's declared dependency resolvable" >&2
+aube install --frozen-lockfile --ignore-scripts --disable-global-virtual-store --reporter append-only
+if ! check_scoped_dependency; then
+    echo "aube did not make @rollup/plugin-replace's declared dependency resolvable" >&2
     exit 1
 fi
