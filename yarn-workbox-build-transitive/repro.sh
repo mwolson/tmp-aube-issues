@@ -26,10 +26,7 @@ cd "$(dirname "$0")"
 
 check_workbox_transitive() {
     node <<'NODE'
-const reactScripts = require.resolve("react-scripts/bin/react-scripts.js");
-const validateOptions = require.resolve("workbox-build/build/lib/validate-options.js", {
-  paths: [reactScripts],
-});
+const validateOptions = require.resolve("workbox-build/build/lib/validate-options.js");
 require.resolve("@apideck/better-ajv-errors", { paths: [validateOptions] });
 NODE
 }
@@ -37,13 +34,13 @@ NODE
 rm -rf node_modules
 "$YARN_BIN" install --frozen-lockfile --ignore-scripts
 if ! check_workbox_transitive; then
-    echo "native Yarn did not make workbox-build's transitive dependency resolvable" >&2
+    echo "native Yarn did not make workbox-build's declared dependency resolvable" >&2
     exit 2
 fi
 
 rm -rf node_modules
 aube install --frozen-lockfile --ignore-scripts --reporter append-only
 if ! check_workbox_transitive; then
-    echo "aube did not make workbox-build's transitive dependency resolvable" >&2
+    echo "aube did not make workbox-build's declared dependency resolvable" >&2
     exit 1
 fi
