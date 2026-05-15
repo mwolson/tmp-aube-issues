@@ -10,7 +10,8 @@ existing npm and Bun projects.
   but it does not add `packages["node_modules/expo-router"]`. A clean frozen
   aube install then omits `node_modules/expo-router`. The stale npm lock was
   produced by npm `11.14.1` from the same manifest before `expo-router` was
-  added.
+  added, using `npm install --package-lock-only --ignore-scripts --no-audit
+  --no-fund`.
   Upstream discussion: https://github.com/endevco/aube/discussions/690
 - `bun-workspace-link` (observed with aube `1.13.1`): aube installs from Bun's
   text `bun.lock`, but a workspace dependency symlink inside `packages/app`
