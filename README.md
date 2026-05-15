@@ -15,6 +15,18 @@ existing npm and Bun projects.
   Docs: https://aube.en.dev/package-manager/configuration,
   https://aube.en.dev/bun-users
   Upstream discussion: https://github.com/endevco/aube/discussions/722
+- [`yarn-hoisted-transitive-dependency`](yarn-hoisted-transitive-dependency)
+  (observed with aube `1.14.1`): aube hoisted mode installs from a Yarn v1
+  `yarn.lock`, but the materialized dependency tree does not make
+  `magic-string`'s declared dependency `sourcemap-codec` resolvable from
+  `magic-string`. Native Yarn v1.22.22 installs the same lockfile with that
+  dependency resolvable. This was first seen through a `react-scripts@5.0.0`
+  hoisted-mode failure on `react-dev-utils/crossSpawn`, but reduces to this
+  smaller transitive dependency case. The repro disables aube's global virtual
+  store so unrelated cached installs cannot mask the missing dependency.
+  Docs: https://aube.en.dev/package-manager/node-modules,
+  https://aube.en.dev/package-manager/lockfiles,
+  https://aube.en.dev/troubleshooting
 - [`yarn-scoped-dependency-linking`](yarn-scoped-dependency-linking) (observed
   with aube `1.14.1`): aube installs from a Yarn v1 `yarn.lock`, but the
   materialized dependency tree does not make `@rollup/plugin-replace`'s

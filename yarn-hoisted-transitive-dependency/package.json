@@ -1,0 +1,7 @@
+{
+  "name": "yarn-hoisted-transitive-dependency",
+  "private": true,
+  "dependencies": {
+    "magic-string": "0.25.9"
+  }
+}
