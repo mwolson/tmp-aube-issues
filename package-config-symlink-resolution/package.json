@@ -1,0 +1,14 @@
+{
+  "name": "package-config-symlink-resolution-repro",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "config-owner": "file:./packages/config-owner-1.0.0.tgz"
+  },
+  "devDependencies": {
+    "require-from-string": "2.0.2"
+  },
+  "scripts": {
+    "repro": "node scripts/load-config.cjs"
+  }
+}

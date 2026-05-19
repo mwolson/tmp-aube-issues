@@ -5,7 +5,23 @@ existing npm and Bun projects.
 
 ## Open
 
-No currently open reports.
+- [`package-config-symlink-resolution`](package-config-symlink-resolution)
+  (observed with aube `1.15.0`): aube installs a package whose config file
+  requires one of that package's declared dependencies, but loading that config
+  through the package's top-level `node_modules/<pkg>` symlink cannot resolve
+  the declared dependency. Loading the same file through `fs.realpathSync`
+  succeeds because Node's resolver then starts inside the aube virtual-store
+  package directory. This was first seen through Expo / React Native
+  autolinking, where `expo`'s `react-native.config.js` requires
+  `expo-modules-autolinking/exports`; if that config load fails, autolinking
+  falls back to parsing native sources and generates an invalid
+  `expo.core.ExpoModulesPackage` import.
+  The reduced repro also fails with pnpm `11.1.3`, so the upstream question is
+  whether aube should mitigate or document this compatibility edge rather than
+  whether it diverges from pnpm's isolated symlink model.
+  Docs: https://aube.en.dev/package-manager/node-modules,
+  https://aube.en.dev/settings/#node_modules,
+  https://aube.en.dev/troubleshooting
 
 ## Fixed
 
