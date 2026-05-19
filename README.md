@@ -22,6 +22,7 @@ existing npm and Bun projects.
   Docs: https://aube.en.dev/package-manager/node-modules,
   https://aube.en.dev/settings/#node_modules,
   https://aube.en.dev/troubleshooting
+  Upstream discussion: https://github.com/endevco/aube/discussions/754
 
 ## Fixed
 
