@@ -5,7 +5,18 @@ existing npm and Bun projects.
 
 ## Open
 
-No currently tracked open repros.
+- [`dlx-allow-build-flag`](dlx-allow-build-flag) (observed with aube
+  `1.18.0`): `aube dlx --allow-build=esbuild vite --version` treats
+  `--allow-build=esbuild` as the package to execute and fails with an invalid
+  package-name registry error. pnpm `11.3.0` accepts the same `dlx` flag, and
+  pnpm documents `pnx`, `pnpm dlx`, and `pnpx` as aliases that support
+  `--allow-build` for allowing named packages to run postinstall scripts during
+  the temporary install. Aube supports `allowBuilds` generally and mirrors
+  `pnpm add --allow-build=<pkg>`, but the `dlx` surface does not currently
+  accept the pnpm flag.
+  Docs: https://pnpm.io/cli/pnx,
+  https://aube.en.dev/package-manager/lifecycle-scripts,
+  https://aube.en.dev/cli/add
 
 ## Fixed
 
