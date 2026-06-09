@@ -3,23 +3,18 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
-## Open
-
-- [`dlx-allow-build-flag`](dlx-allow-build-flag) (observed with aube
-  `1.18.0`): `aube dlx --allow-build=esbuild vite --version` treats
-  `--allow-build=esbuild` as the package to execute and fails with an invalid
-  package-name registry error. pnpm `11.3.0` accepts the same `dlx` flag, and
-  pnpm documents `pnx`, `pnpm dlx`, and `pnpx` as aliases that support
-  `--allow-build` for allowing named packages to run postinstall scripts during
-  the temporary install. Aube supports `allowBuilds` generally and mirrors
-  `pnpm add --allow-build=<pkg>`, but the `dlx` surface does not currently
-  accept the pnpm flag.
-  Docs: https://pnpm.io/cli/pnx,
-  https://aube.en.dev/package-manager/lifecycle-scripts,
-  https://aube.en.dev/cli/add
-
 ## Fixed
 
+- [`dlx-allow-build-flag`](dlx-allow-build-flag) (observed with aube `1.18.0`,
+  fixed in aube `1.18.2`): `aube dlx --allow-build=esbuild vite --version`
+  treated `--allow-build=esbuild` as the package to execute and failed with an
+  invalid package-name registry error. pnpm `11.3.0` accepts the same `dlx`
+  flag, and pnpm documents `pnx`, `pnpm dlx`, and `pnpx` as aliases that
+  support `--allow-build` for allowing named packages to run postinstall scripts
+  during the temporary install.
+  Docs: https://pnpm.io/cli/pnx,
+  https://aube.jdx.dev/package-manager/lifecycle-scripts,
+  https://aube.jdx.dev/cli/add
 - [`bun-patched-dependencies`](bun-patched-dependencies) (observed with aube
   `1.14.1`, fixed in aube `1.15.0`): aube installs from Bun's text `bun.lock`,
   but it does not apply Bun's top-level `patchedDependencies` manifest field.
@@ -27,14 +22,14 @@ existing npm and Bun projects.
   documents patch support through `aube.patchedDependencies` /
   `pnpm.patchedDependencies`, but the Bun rollout docs do not mention Bun's
   top-level field.
-  Docs: https://aube.en.dev/package-manager/configuration,
-  https://aube.en.dev/bun-users
-  Upstream discussion: https://github.com/endevco/aube/discussions/722
+  Docs: https://aube.jdx.dev/package-manager/configuration,
+  https://aube.jdx.dev/bun-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/722
 - [`bun-workspace-link`](bun-workspace-link) (observed with aube `1.13.1`,
   fixed in aube `1.14.1`): aube installs from Bun's text `bun.lock`, but a
   workspace dependency symlink inside `packages/app` points to the workspace
   root instead of `packages/contracts`.
-  Upstream discussion: https://github.com/endevco/aube/discussions/691
+  Upstream discussion: https://github.com/jdx/aube/discussions/691
 - [`npm-lock-missing-entry`](npm-lock-missing-entry) (observed with aube
   `1.14.0`, fixed in aube `1.14.1`): aube repairs a stale npm
   `package-lock.json` by adding the root `expo-router` dependency spec,
@@ -43,7 +38,7 @@ existing npm and Bun projects.
   produced by npm `11.14.1` from the same manifest before `expo-router` was
   added, using `npm install --package-lock-only --ignore-scripts --no-audit
   --no-fund`.
-  Upstream discussion: https://github.com/endevco/aube/discussions/690
+  Upstream discussion: https://github.com/jdx/aube/discussions/690
 - [`yarn-hoisted-transitive-dependency`](yarn-hoisted-transitive-dependency)
   (observed with aube `1.14.1`, fixed in aube `1.15.0`): aube hoisted mode
   installs from a Yarn v1 `yarn.lock`, but the materialized dependency tree
@@ -54,10 +49,10 @@ existing npm and Bun projects.
   but reduces to this smaller transitive dependency case. The repro disables
   aube's global virtual store so unrelated cached installs cannot mask the
   missing dependency.
-  Docs: https://aube.en.dev/package-manager/node-modules,
-  https://aube.en.dev/package-manager/lockfiles,
-  https://aube.en.dev/troubleshooting
-  Upstream discussion: https://github.com/endevco/aube/discussions/725
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/troubleshooting
+  Upstream discussion: https://github.com/jdx/aube/discussions/725
 - [`yarn-scoped-dependency-linking`](yarn-scoped-dependency-linking) (observed
   with aube `1.14.1`, fixed in aube `1.15.0`): aube installs from a Yarn v1
   `yarn.lock`, but the materialized dependency tree does not make
@@ -68,10 +63,10 @@ existing npm and Bun projects.
   to this smaller scoped-dependency case. The repro disables aube's global
   virtual store so unrelated cached installs cannot mask the missing scoped
   dependency.
-  Docs: https://aube.en.dev/package-manager/node-modules,
-  https://aube.en.dev/package-manager/lockfiles,
-  https://aube.en.dev/troubleshooting
-  Upstream discussion: https://github.com/endevco/aube/discussions/723
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/troubleshooting
+  Upstream discussion: https://github.com/jdx/aube/discussions/723
 
 ## Mitigated
 
@@ -91,7 +86,7 @@ existing npm and Bun projects.
   Mitigated by `aube install --node-linker=hoisted`, and by aubeshim `0.6.0`
   for npm-shaped local commands, which runs npm-shimmed aube invocations with
   `AUBE_NODE_LINKER=hoisted` unless the caller already selected a node linker.
-  Upstream discussion: https://github.com/endevco/aube/discussions/754
+  Upstream discussion: https://github.com/jdx/aube/discussions/754
 - [`install-omit-optional`](install-omit-optional) (observed with aube
   `1.14.1`, still present in aube `1.15.0`): aube rejects
   `aube install --omit optional` with an unexpected argument error. This blocks
@@ -99,7 +94,7 @@ existing npm and Bun projects.
   aube's documented equivalent is `--no-optional`. Mitigated in aubeshim
   `0.5.0`, which translates npm/Bun `--omit optional` to aube `--no-optional`
   and npm/Bun `--omit dev` to aube `--prod`.
-  Docs: https://aube.en.dev/package-manager/install
+  Docs: https://aube.jdx.dev/package-manager/install
 
 Each case has a `repro.sh` script that exits zero when aube behaves correctly
 and non-zero when the issue is observed.
