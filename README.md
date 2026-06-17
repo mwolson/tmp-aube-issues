@@ -3,6 +3,23 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
+## Open
+
+- [`global-outdated-packages`](global-outdated-packages) (observed with aube
+  `1.21.0`): aube supports global package installs and global updates, but
+  `aube outdated -g` is rejected with an unexpected argument error instead of
+  checking globally installed packages. The repro installs
+  `is-positive@1.0.0` into an isolated aube global directory, confirms the
+  package is globally listed, and then shows `aube outdated -g` fails before it
+  can inspect global package state. This leaves npm/pnpm-compatible shims
+  without a faithful aube-backed implementation for package-less global
+  outdated checks.
+  Docs: https://aube.jdx.dev/package-manager/dependencies.html,
+  https://aube.jdx.dev/cli/outdated
+  Related upstream discussion: https://github.com/jdx/aube/discussions/839
+  fixed the adjacent `aube update --global` global-routing gap in
+  https://github.com/jdx/aube/pull/840.
+
 ## Fixed
 
 - [`dlx-allow-build-flag`](dlx-allow-build-flag) (observed with aube `1.18.0`,
