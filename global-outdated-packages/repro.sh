@@ -34,16 +34,18 @@ aube_status=$?
 set -e
 cat "$aube_output"
 
-if [[ "$aube_status" -eq 0 ]]; then
-    echo
-    echo "aube accepted outdated -g."
-    exit 0
-fi
-
 if grep -q -- "unexpected argument '-g'" "$aube_output"; then
     echo
     echo "Observed issue: aube rejects outdated -g instead of checking global packages."
     exit 1
+fi
+
+if [[ "$aube_status" -eq 0 || "$aube_status" -eq 1 ]]; then
+    if grep -q -- "Package[[:space:]]\+Current[[:space:]]\+Wanted[[:space:]]\+Latest" "$aube_output"; then
+        echo
+        echo "aube accepted outdated -g and reported global package versions."
+        exit 0
+    fi
 fi
 
 echo

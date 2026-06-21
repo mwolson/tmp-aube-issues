@@ -3,25 +3,19 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
-## Open
-
-- [`global-outdated-packages`](global-outdated-packages) (observed with aube
-  `1.21.0`): aube supports global package installs and global updates, but
-  `aube outdated -g` is rejected with an unexpected argument error instead of
-  checking globally installed packages. The repro installs
-  `is-positive@1.0.0` into an isolated aube global directory, confirms the
-  package is globally listed, and then shows `aube outdated -g` fails before it
-  can inspect global package state. This leaves npm/pnpm-compatible shims
-  without a faithful aube-backed implementation for package-less global
-  outdated checks.
-  Docs: https://aube.jdx.dev/package-manager/dependencies.html,
-  https://aube.jdx.dev/cli/outdated
-  Related upstream discussion: https://github.com/jdx/aube/discussions/839
-  fixed the adjacent `aube update --global` global-routing gap in
-  https://github.com/jdx/aube/pull/840.
-
 ## Fixed
 
+- [`global-outdated-packages`](global-outdated-packages) (observed with aube
+  `1.21.0`, fixed in aube `1.23.0`): aube supports global package installs and
+  global updates, but `aube outdated -g` was rejected with an unexpected
+  argument error instead of checking globally installed packages. The repro
+  installs `is-positive@1.0.0` into an isolated aube global directory, confirms
+  the package is globally listed, and then shows `aube outdated -g` reports the
+  stale global version. aube returns exit code `1` when outdated globals exist,
+  matching npm-style outdated semantics.
+  Docs: https://aube.jdx.dev/package-manager/dependencies.html,
+  https://aube.jdx.dev/cli/outdated
+  Upstream fix: https://github.com/jdx/aube/pull/910
 - [`dlx-allow-build-flag`](dlx-allow-build-flag) (observed with aube `1.18.0`,
   fixed in aube `1.18.2`): `aube dlx --allow-build=esbuild vite --version`
   treated `--allow-build=esbuild` as the package to execute and failed with an
