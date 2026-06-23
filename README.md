@@ -15,6 +15,7 @@ existing npm and Bun projects.
   fails today.
   Docs: https://aube.jdx.dev/cli/bin.html,
   https://aube.jdx.dev/pnpm-users.html
+  Upstream discussion: https://github.com/jdx/aube/discussions/936
 
 ## Fixed
 
