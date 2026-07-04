@@ -6,16 +6,17 @@ existing npm and Bun projects.
 ## Open
 
 - [`pnpm-bin-workspace-flag`](pnpm-bin-workspace-flag) (observed with aube
-  `1.23.0`): pnpm's `bin -w` prints the workspace-root `node_modules/.bin`
-  from a workspace package, but `aube bin -w` rejects the flag. The manual
-  equivalent is `aube bin -C <workspace-root>`, which matches pnpm's output.
+  `1.23.0`, still present in `1.25.2`): pnpm's `bin -w` prints the
+  workspace-root `node_modules/.bin` from a workspace package, but
+  `aube bin -w` rejects the flag. The manual equivalent is
+  `aube bin -C <workspace-root>`, which matches pnpm's output.
   Official `aube bin` docs only document `-g`; generated help also exposes
   `-C/--dir` but not pnpm's `-w`. No matching upstream discussion was found.
   aubeshim routes `pnpm bin` to `aube bin`, so `pnpm bin -w` through the shim
   fails today.
   Docs: https://aube.jdx.dev/cli/bin.html,
   https://aube.jdx.dev/pnpm-users.html
-  Upstream discussion: https://github.com/jdx/aube/discussions/936
+  Upstream discussion: https://github.com/jdx/aube/discussions/988
 
 ## Fixed
 
