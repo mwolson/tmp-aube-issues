@@ -3,6 +3,23 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
+## Open
+
+- [`pnpm-patch-plain-unified-diff`](pnpm-patch-plain-unified-diff) (observed
+  with aube `1.26.0`, also reproduced on `1.25.2`): aube's patch applier only
+  recognizes file sections introduced by a `diff --git` header line. A patch
+  file written as a plain unified diff (starting directly with `--- a/...` /
+  `+++ b/...`) fails `aube install` with `failed to apply patch for
+  is-number@7.0.0: patch section missing file path`. Native pnpm `10.24.0`
+  and `11.11.0` apply the same patch file from the same
+  `pnpm-workspace.yaml` `patchedDependencies` entry. Found while migrating a
+  pnpm workspace whose patches included one hand-written unified diff;
+  prepending a `diff --git a/<path> b/<path>` header line makes aube accept
+  the patch, which is the current workaround.
+  Docs: https://aube.jdx.dev/cli/patch-commit,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1018
+
 ## Fixed
 
 - [`pnpm-bin-workspace-flag`](pnpm-bin-workspace-flag) (observed with aube
