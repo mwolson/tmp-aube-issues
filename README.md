@@ -3,23 +3,18 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
-## Open
+## Fixed
 
 - [`pnpm-bin-workspace-flag`](pnpm-bin-workspace-flag) (observed with aube
-  `1.23.0`, still present in `1.25.2`): pnpm's `bin -w` prints the
-  workspace-root `node_modules/.bin` from a workspace package, but
-  `aube bin -w` rejects the flag. The manual equivalent is
-  `aube bin -C <workspace-root>`, which matches pnpm's output.
-  Official `aube bin` docs only document `-g`; generated help also exposes
-  `-C/--dir` but not pnpm's `-w`. No matching upstream discussion was found.
-  aubeshim routes `pnpm bin` to `aube bin`, so `pnpm bin -w` through the shim
-  fails today.
+  `1.23.0`, fixed in aube `1.26.0`): pnpm's `bin -w` prints the workspace-root
+  `node_modules/.bin` from a workspace package. Aube already supported the
+  long `--workspace-root` global flag, and now accepts `-w`,
+  `--workspace-root`, and `--workspace` directly on `aube bin`. The repro
+  confirms `aube bin -w` matches native pnpm's output from a workspace package.
   Docs: https://aube.jdx.dev/cli/bin.html,
   https://aube.jdx.dev/pnpm-users.html
   Upstream discussion: https://github.com/jdx/aube/discussions/988
-
-## Fixed
-
+  Upstream fix: https://github.com/jdx/aube/pull/993
 - [`global-outdated-packages`](global-outdated-packages) (observed with aube
   `1.21.0`, fixed in aube `1.23.0`): aube supports global package installs and
   global updates, but `aube outdated -g` was rejected with an unexpected

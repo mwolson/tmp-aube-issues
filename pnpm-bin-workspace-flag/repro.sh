@@ -6,8 +6,9 @@ if ! command -v aube >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! command -v pnpm >/dev/null 2>&1; then
-    echo "pnpm is required" >&2
+pnpm_bin="${PNPM_BIN:-pnpm}"
+if ! command -v "$pnpm_bin" >/dev/null 2>&1; then
+    echo "pnpm is required (set PNPM_BIN to its path)" >&2
     exit 1
 fi
 
@@ -18,25 +19,26 @@ rm -rf "$root/node_modules" "$root/packages/app/node_modules"
 
 cd "$root/packages/app"
 
-expected="$(cd "$root" && pnpm bin -w)"
-actual="$(aube bin -C "$root" 2>/dev/null || true)"
+expected="$(cd "$root" && "$pnpm_bin" bin -w)"
+explicit_root="$(aube bin -C "$root" 2>/dev/null || true)"
 
-if [[ -z "$actual" || ! -d "$actual" ]]; then
+if [[ -z "$explicit_root" || ! -d "$explicit_root" ]]; then
     echo "failed: could not resolve workspace root bin via aube bin -C" >&2
     exit 1
 fi
 
-if [[ "$actual" != "$expected" ]]; then
-    echo "failed: aube bin -C root returned $actual" >&2
+if [[ "$explicit_root" != "$expected" ]]; then
+    echo "failed: aube bin -C root returned $explicit_root" >&2
     echo "expected pnpm bin -w: $expected" >&2
     exit 1
 fi
 
-if aube bin -w >/dev/null 2>&1; then
-    echo "pass: aube bin -w is supported"
-    exit 0
+actual="$(aube bin -w 2>/dev/null || true)"
+if [[ "$actual" != "$expected" ]]; then
+    echo "compat gap: aube bin -w returned ${actual:-no path}" >&2
+    echo "expected pnpm bin -w: $expected" >&2
+    echo "workaround: aube bin -C <workspace-root> ($explicit_root)" >&2
+    exit 1
 fi
 
-echo "compat gap: pnpm bin -w works ($expected) but aube bin -w is unsupported" >&2
-echo "workaround: aube bin -C <workspace-root> ($actual)" >&2
-exit 1
+echo "pass: aube bin -w matches pnpm bin -w ($actual)"
