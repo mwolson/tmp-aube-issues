@@ -5,6 +5,28 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-patch-stale-lock-path`](pnpm-patch-stale-lock-path) (observed with
+  aube `1.26.0`, also reproduced on `1.25.2`): a non-frozen `aube install`
+  fails with `failed to read patch file patches/is-odd@3.0.0.patch for
+  is-odd@3.0.0: No such file or directory` when the committed `pnpm-lock.yaml`
+  still records a `patchedDependencies` entry for a patch key and file that
+  the workspace no longer declares. Native pnpm `10.24.0` and `11.11.0`
+  re-resolve to the new version and apply the new patch from the same state.
+  The stale lock and both patch files were produced by pnpm `10.24.0` using
+  `pnpm install --ignore-scripts`, `pnpm patch is-odd@<version>`, and
+  `pnpm patch-commit --patches-dir patches` while the manifest pinned
+  `is-odd@3.0.0`; the manifest and workspace patch were then upgraded to
+  `is-odd@3.0.1` (old patch file deleted) without rerunning install, as
+  happens when a merge or rebase updates manifests but keeps the old lock.
+  The repro passes `--no-frozen-lockfile` to both package managers so the
+  comparison stays non-frozen even where `CI` is set.
+  Aube succeeds when the old patch file still exists on disk, so the failing
+  eager read is of a patch the new resolution never uses. With a pnpm `11`
+  hash-only lockfile in the same drifted state, aube fails the same way but
+  treats the hash string itself as the patch file path.
+  Docs: https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1019
 - [`pnpm-patch-plain-unified-diff`](pnpm-patch-plain-unified-diff) (observed
   with aube `1.26.0`, also reproduced on `1.25.2`): aube's patch applier only
   recognizes file sections introduced by a `diff --git` header line. A patch

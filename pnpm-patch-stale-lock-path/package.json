@@ -1,0 +1,7 @@
+{
+  "name": "pnpm-patch-stale-lock-path",
+  "private": true,
+  "dependencies": {
+    "is-odd": "3.0.1"
+  }
+}
