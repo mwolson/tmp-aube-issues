@@ -5,6 +5,32 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-patch-reresolve-drop`](pnpm-patch-reresolve-drop) (observed with
+  aube `1.26.0`, still present on master `730bc4ce` after the #1022 fix): a
+  non-frozen `aube install` that re-resolves because of unrelated manifest
+  drift (a new `is-positive` dependency the lockfile does not have yet) loses
+  the pnpm-compatible patch metadata for a patch the workspace still declares
+  and the lockfile still records correctly. On `1.26.0` the rewritten
+  `pnpm-lock.yaml` keeps only an empty `patchedDependencies:` key and no
+  `(patch_hash=...)` suffixes. On master, #1022 restores the top-level entry,
+  but writes it in path form (`patches/is-odd@3.0.1.patch`) instead of the
+  pnpm 11 hash form and still omits the `(patch_hash=...)` suffixes from
+  importer and snapshot keys, so a subsequent native pnpm `11.11.0`
+  `--frozen-lockfile` install fails with
+  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. Native pnpm `11.11.0` re-resolves the
+  same drifted state keeping both the applied patch and the full metadata.
+  Both aube versions also link the patched package from a store directory
+  without a patch label (`.aube/is-odd@3.0.1`); in a larger project where a
+  plain-named store entry already existed unpatched, aube silently linked the
+  unpatched content. Distinct from `pnpm-patch-stale-lock-path` /
+  discussion #1019: there the lockfile records a patch the workspace no
+  longer declares and aube fails hard; here the declaration and lockfile
+  agree, the drift is unrelated, and the loss is silent.
+  The fixture lockfile was produced by native pnpm `11.11.0` with the patch
+  declared, then `is-positive` was added to `package.json` without rerunning
+  install, as happens when a merge updates manifests but keeps the old lock.
+  Docs: https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/pnpm-users
 - [`pnpm-patch-stale-lock-path`](pnpm-patch-stale-lock-path) (observed with
   aube `1.26.0`, also reproduced on `1.25.2`): a non-frozen `aube install`
   fails with `failed to read patch file patches/is-odd@3.0.0.patch for
