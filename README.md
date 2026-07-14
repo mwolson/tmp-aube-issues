@@ -21,6 +21,7 @@ existing npm and Bun projects.
   `file:./modules/<pkg>`.
   Docs: https://aube.jdx.dev/package-manager/dependencies,
   https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1030
 - [`pnpm-patch-reresolve-drop`](pnpm-patch-reresolve-drop) (observed with
   aube `1.26.0`, still present on master `730bc4ce` after the #1022 fix): a
   non-frozen `aube install` that re-resolves because of unrelated manifest
