@@ -31,6 +31,7 @@ existing npm and Bun projects.
   install, as happens when a merge updates manifests but keeps the old lock.
   Docs: https://aube.jdx.dev/package-manager/lockfiles,
   https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1029
 - [`pnpm-patch-stale-lock-path`](pnpm-patch-stale-lock-path) (observed with
   aube `1.26.0`, also reproduced on `1.25.2`): a non-frozen `aube install`
   fails with `failed to read patch file patches/is-odd@3.0.0.patch for
