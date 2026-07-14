@@ -5,6 +5,22 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-file-dep-stale-store`](pnpm-file-dep-stale-store) (observed with
+  aube `1.26.0`, store-key logic unchanged on master `730bc4ce`): a settled
+  workspace with a nested `file:./modules/...` dependency materializes a
+  store copy under `node_modules/.aube/<name>@file+<path-hash>/`. After the
+  source directory changes on disk (no package.json or lockfile edits),
+  `CI=1 aube install` reports "Already up to date" and keeps serving the
+  stale store copy. Native pnpm `11.11.0` re-adds the package and refreshes
+  the installed content from the same state. The store key is
+  `SHA256(posix_path)[0..16]` of the rebased path only (not directory
+  contents), and the warm-path freshness check does not re-hash `file:`
+  source trees. Work around by deleting
+  `node_modules/.aube/*@file+*` for the package and reinstalling.
+  Mirrors real monorepo shape `apps/mobile` depending on
+  `file:./modules/<pkg>`.
+  Docs: https://aube.jdx.dev/package-manager/dependencies,
+  https://aube.jdx.dev/pnpm-users
 - [`pnpm-patch-reresolve-drop`](pnpm-patch-reresolve-drop) (observed with
   aube `1.26.0`, still present on master `730bc4ce` after the #1022 fix): a
   non-frozen `aube install` that re-resolves because of unrelated manifest

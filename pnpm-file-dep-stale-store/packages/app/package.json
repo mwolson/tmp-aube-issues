@@ -1,0 +1,7 @@
+{
+  "name": "app",
+  "private": true,
+  "dependencies": {
+    "@repro/local-mod": "file:./modules/local-mod"
+  }
+}
