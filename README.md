@@ -5,89 +5,54 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`pnpm-file-dep-stale-store`](pnpm-file-dep-stale-store) (observed with
-  aube `1.26.0`, store-key logic unchanged on master `730bc4ce`): a settled
-  workspace with a nested `file:./modules/...` dependency materializes a
-  store copy under `node_modules/.aube/<name>@file+<path-hash>/`. After the
-  source directory changes on disk (no package.json or lockfile edits),
-  `CI=1 aube install` reports "Already up to date" and keeps serving the
-  stale store copy. Native pnpm `11.11.0` re-adds the package and refreshes
-  the installed content from the same state. The store key is
-  `SHA256(posix_path)[0..16]` of the rebased path only (not directory
-  contents), and the warm-path freshness check does not re-hash `file:`
-  source trees. Work around by deleting
-  `node_modules/.aube/*@file+*` for the package and reinstalling.
-  Mirrors real monorepo shape `apps/mobile` depending on
-  `file:./modules/<pkg>`.
-  Docs: https://aube.jdx.dev/package-manager/dependencies,
-  https://aube.jdx.dev/pnpm-users
-  Upstream discussion: https://github.com/jdx/aube/discussions/1030
-- [`pnpm-patch-reresolve-drop`](pnpm-patch-reresolve-drop) (observed with
-  aube `1.26.0`, still present on master `730bc4ce` after the #1022 fix): a
-  non-frozen `aube install` that re-resolves because of unrelated manifest
-  drift (a new `is-positive` dependency the lockfile does not have yet) loses
-  the pnpm-compatible patch metadata for a patch the workspace still declares
-  and the lockfile still records correctly. On `1.26.0` the rewritten
-  `pnpm-lock.yaml` keeps only an empty `patchedDependencies:` key and no
-  `(patch_hash=...)` suffixes. On master, #1022 restores the top-level entry,
-  but writes it in path form (`patches/is-odd@3.0.1.patch`) instead of the
-  pnpm 11 hash form and still omits the `(patch_hash=...)` suffixes from
-  importer and snapshot keys, so a subsequent native pnpm `11.11.0`
-  `--frozen-lockfile` install fails with
-  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. Native pnpm `11.11.0` re-resolves the
-  same drifted state keeping both the applied patch and the full metadata.
-  Both aube versions also link the patched package from a store directory
-  without a patch label (`.aube/is-odd@3.0.1`); in a larger project where a
-  plain-named store entry already existed unpatched, aube silently linked the
-  unpatched content. Distinct from `pnpm-patch-stale-lock-path` /
-  discussion #1019: there the lockfile records a patch the workspace no
-  longer declares and aube fails hard; here the declaration and lockfile
-  agree, the drift is unrelated, and the loss is silent.
-  The fixture lockfile was produced by native pnpm `11.11.0` with the patch
-  declared, then `is-positive` was added to `package.json` without rerunning
-  install, as happens when a merge updates manifests but keeps the old lock.
-  Docs: https://aube.jdx.dev/package-manager/lockfiles,
-  https://aube.jdx.dev/pnpm-users
-  Upstream discussion: https://github.com/jdx/aube/discussions/1029
-- [`pnpm-patch-stale-lock-path`](pnpm-patch-stale-lock-path) (observed with
-  aube `1.26.0`, also reproduced on `1.25.2`): a non-frozen `aube install`
-  fails with `failed to read patch file patches/is-odd@3.0.0.patch for
-  is-odd@3.0.0: No such file or directory` when the committed `pnpm-lock.yaml`
-  still records a `patchedDependencies` entry for a patch key and file that
-  the workspace no longer declares. Native pnpm `10.24.0` and `11.11.0`
-  re-resolve to the new version and apply the new patch from the same state.
-  The stale lock and both patch files were produced by pnpm `10.24.0` using
-  `pnpm install --ignore-scripts`, `pnpm patch is-odd@<version>`, and
-  `pnpm patch-commit --patches-dir patches` while the manifest pinned
-  `is-odd@3.0.0`; the manifest and workspace patch were then upgraded to
-  `is-odd@3.0.1` (old patch file deleted) without rerunning install, as
-  happens when a merge or rebase updates manifests but keeps the old lock.
-  The repro passes `--no-frozen-lockfile` to both package managers so the
-  comparison stays non-frozen even where `CI` is set.
-  Aube succeeds when the old patch file still exists on disk, so the failing
-  eager read is of a patch the new resolution never uses. With a pnpm `11`
-  hash-only lockfile in the same drifted state, aube fails the same way but
-  treats the hash string itself as the patch file path.
-  Docs: https://aube.jdx.dev/package-manager/lockfiles,
-  https://aube.jdx.dev/pnpm-users
-  Upstream discussion: https://github.com/jdx/aube/discussions/1019
-- [`pnpm-patch-plain-unified-diff`](pnpm-patch-plain-unified-diff) (observed
-  with aube `1.26.0`, also reproduced on `1.25.2`): aube's patch applier only
-  recognizes file sections introduced by a `diff --git` header line. A patch
-  file written as a plain unified diff (starting directly with `--- a/...` /
-  `+++ b/...`) fails `aube install` with `failed to apply patch for
-  is-number@7.0.0: patch section missing file path`. Native pnpm `10.24.0`
-  and `11.11.0` apply the same patch file from the same
-  `pnpm-workspace.yaml` `patchedDependencies` entry. Found while migrating a
-  pnpm workspace whose patches included one hand-written unified diff;
-  prepending a `diff --git a/<path> b/<path>` header line makes aube accept
-  the patch, which is the current workaround.
-  Docs: https://aube.jdx.dev/cli/patch-commit,
-  https://aube.jdx.dev/pnpm-users
-  Upstream discussion: https://github.com/jdx/aube/discussions/1018
+None currently. Last retested with aube `1.31.0` (2026-07-21).
 
 ## Fixed
 
+- [`pnpm-file-dep-stale-store`](pnpm-file-dep-stale-store) (observed with
+  aube `1.26.0`, fixed in aube `1.28.0`): a settled workspace with a nested
+  `file:./modules/...` dependency kept serving a stale store copy under
+  `node_modules/.aube/<name>@file+<path-hash>/` after the source directory
+  changed on disk. Native pnpm re-added and refreshed the installed content
+  from the same state. Aube now fingerprints local directory dependency
+  contents before taking the warm "Already up to date" path.
+  Docs: https://aube.jdx.dev/package-manager/dependencies,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1030
+  Upstream fix: https://github.com/jdx/aube/pull/1034
+- [`pnpm-patch-reresolve-drop`](pnpm-patch-reresolve-drop) (observed with
+  aube `1.26.0`, fixed in aube `1.28.0`): a non-frozen `aube install` that
+  re-resolved because of unrelated manifest drift lost pnpm-compatible patch
+  metadata for a still-declared patch. Later aube builds restored the top-level
+  entry but still dropped `(patch_hash=...)` identities, so a subsequent native
+  pnpm `--frozen-lockfile` install failed. Aube now preserves or derives pnpm
+  patch hashes on re-resolve.
+  Docs: https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1029
+  Upstream fix: https://github.com/jdx/aube/pull/1035
+- [`pnpm-patch-stale-lock-path`](pnpm-patch-stale-lock-path) (observed with
+  aube `1.26.0`, also reproduced on `1.25.2`, fixed in aube `1.27.0`): a
+  non-frozen `aube install` failed reading a stale `patchedDependencies` path
+  from the committed lockfile after the workspace moved to a different patch
+  key and deleted the old patch file. Native pnpm re-resolved and applied the
+  current patch from the same state. Fresh re-resolutions now replace the
+  overlaid patch map with the current workspace declarations.
+  Docs: https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1019
+  Upstream fix: https://github.com/jdx/aube/pull/1022
+- [`pnpm-patch-plain-unified-diff`](pnpm-patch-plain-unified-diff) (observed
+  with aube `1.26.0`, also reproduced on `1.25.2`, fixed in aube `1.27.0`):
+  aube's patch applier only recognized file sections introduced by a
+  `diff --git` header line. Plain unified diffs starting with `---` / `+++`
+  failed with `patch section missing file path`. Native pnpm applied the same
+  patch from the same `patchedDependencies` entry. Aube now accepts plain
+  unified diffs as well.
+  Docs: https://aube.jdx.dev/cli/patch-commit,
+  https://aube.jdx.dev/pnpm-users
+  Upstream discussion: https://github.com/jdx/aube/discussions/1018
+  Upstream fix: https://github.com/jdx/aube/pull/1021
 - [`pnpm-bin-workspace-flag`](pnpm-bin-workspace-flag) (observed with aube
   `1.23.0`, fixed in aube `1.26.0`): pnpm's `bin -w` prints the workspace-root
   `node_modules/.bin` from a workspace package. Aube already supported the
@@ -175,7 +140,7 @@ existing npm and Bun projects.
 ## Mitigated
 
 - [`package-config-symlink-resolution`](package-config-symlink-resolution)
-  (observed with aube `1.15.0`, still present with aube `1.17.1` in default
+  (observed with aube `1.15.0`, still present with aube `1.31.0` in default
   isolated mode): aube installs a package whose config file requires one of that
   package's declared dependencies, but loading that config through the package's
   top-level `node_modules/<pkg>` symlink cannot resolve the declared dependency.
@@ -187,16 +152,16 @@ existing npm and Bun projects.
   generates an invalid `expo.core.ExpoModulesPackage` import. The reduced repro
   also fails with pnpm `11.1.3`, so this is an isolated symlink layout
   compatibility edge rather than an aube-only divergence from pnpm.
-  Mitigated by `aube install --node-linker=hoisted`, and by aubeshim `0.6.0`
+  Mitigated by `aube install --node-linker=hoisted`, and by aubeshim
   for npm-shaped local commands, which runs npm-shimmed aube invocations with
   `AUBE_NODE_LINKER=hoisted` unless the caller already selected a node linker.
   Upstream discussion: https://github.com/jdx/aube/discussions/754
 - [`install-omit-optional`](install-omit-optional) (observed with aube
-  `1.14.1`, still present in aube `1.15.0`): aube rejects
+  `1.14.1`, still present with aube `1.31.0`): aube rejects
   `aube install --omit optional` with an unexpected argument error. This blocks
   npm/Bun-compatible production install commands that use `--omit optional`;
-  aube's documented equivalent is `--no-optional`. Mitigated in aubeshim
-  `0.5.0`, which translates npm/Bun `--omit optional` to aube `--no-optional`
+  aube's documented equivalent is `--no-optional`. Mitigated in aubeshim,
+  which translates npm/Bun `--omit optional` to aube `--no-optional`
   and npm/Bun `--omit dev` to aube `--prod`.
   Docs: https://aube.jdx.dev/package-manager/install
 
