@@ -1,0 +1,5 @@
+{
+  "name": "pnpm-user-npmrc-allowbuilds-read-only",
+  "private": true,
+  "dependencies": { "esbuild": "0.25.12" }
+}

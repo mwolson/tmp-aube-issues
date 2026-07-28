@@ -5,6 +5,17 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-user-npmrc-allowbuilds-read-only`](pnpm-user-npmrc-allowbuilds-read-only)
+  (observed with aube `1.32.0` and `1.34.0`, 2026-07-28): `aube config get
+  allowBuilds` reports a value from the user-level `~/.npmrc` that `aube
+  install` then ignores, so the documented way to check the setting confirms a
+  configuration that has no effect. The same allowlist in
+  `package.json#aube.allowBuilds` is honored, so the divergence is between
+  config sources rather than an unsupported setting. Follow-up to the write half
+  raised in [#617](https://github.com/jdx/aube/discussions/617), where `aube
+  config set allowBuilds.<pkg>` used to write to `~/.npmrc` with no effect; that
+  path now errors, but the read path was not changed with it.
+
 - [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
   (observed with aube `1.32.0` and still present in `1.34.0`, 2026-07-28): in a
   workspace whose `supportedArchitectures` lists include `current`,
