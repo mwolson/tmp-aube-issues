@@ -14,7 +14,8 @@ existing npm and Bun projects.
   config sources rather than an unsupported setting. Follow-up to the write half
   raised in [#617](https://github.com/jdx/aube/discussions/617), where `aube
   config set allowBuilds.<pkg>` used to write to `~/.npmrc` with no effect; that
-  path now errors, but the read path was not changed with it.
+  path now errors, but the read path was not changed with it. Filed as
+  [#1158](https://github.com/jdx/aube/discussions/1158).
 
 - [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
   (observed with aube `1.32.0` and still present in `1.34.0`, 2026-07-28): in a
