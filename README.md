@@ -6,16 +6,27 @@ existing npm and Bun projects.
 ## Open
 
 - [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
-  (observed with aube `1.32.0`, 2026-07-28): in a workspace whose
-  `supportedArchitectures` lists include `current`, aube drops foreign-platform
-  optional dependencies from the lockfile. A filtered `add` prunes them
-  completely; a plain `install` prunes partially. Because `current` resolves
-  per-machine, a lockfile written on Linux loses every darwin and win32 entry,
-  and the authoring machine sees nothing wrong. Installing that lockfile while
-  targeting another platform then silently lands the wrong platform binary
-  instead of failing, since the needed entry is no longer in the file. Native
-  pnpm `11.17.0` keeps every variant in the lockfile and applies
-  `supportedArchitectures` only when choosing what to place in `node_modules`.
+  (observed with aube `1.32.0` and still present in `1.34.0`, 2026-07-28): in a
+  workspace whose `supportedArchitectures` lists include `current`,
+  `aube --filter <pkg> add` drops every foreign-platform optional dependency
+  from a pnpm lockfile. On `1.34.0` a plain `aube install` preserves all 45
+  esbuild platform entries while the filtered `add` on the same workspace drops
+  all 45, so the two commands disagree with each other within one version. On
+  `1.32.0` the plain install pruned partially (45 to 21).
+
+  Because `current` resolves per-machine, a lockfile written on Linux loses
+  every darwin and win32 entry and the authoring machine sees nothing wrong.
+  Installing that lockfile while targeting darwin then silently places the linux
+  binary and no darwin binary rather than failing. Native pnpm `11.17.0` keeps
+  every variant in the lockfile and applies `supportedArchitectures` only when
+  choosing what to place in `node_modules`.
+
+  Related to [#938](https://github.com/jdx/aube/discussions/938), which covered
+  the same class of problem for `package-lock.json` and was addressed for npm
+  lockfiles by [#942](https://github.com/jdx/aube/pull/942). That fix shipped
+  before `1.32.0` and did not cover the pnpm lockfile path. `supportedArchitectures`
+  is the workaround recommended in #938, and it is what this workspace already
+  sets.
 
 ## Fixed
 
