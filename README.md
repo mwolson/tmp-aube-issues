@@ -21,6 +21,8 @@ existing npm and Bun projects.
   every variant in the lockfile and applies `supportedArchitectures` only when
   choosing what to place in `node_modules`.
 
+  Filed as [#1155](https://github.com/jdx/aube/discussions/1155).
+
   Related to [#938](https://github.com/jdx/aube/discussions/938), which covered
   the same class of problem for `package-lock.json` and was addressed for npm
   lockfiles by [#942](https://github.com/jdx/aube/pull/942). That fix shipped
