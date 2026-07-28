@@ -5,7 +5,17 @@ existing npm and Bun projects.
 
 ## Open
 
-None currently. Last retested with aube `1.31.0` (2026-07-21).
+- [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
+  (observed with aube `1.32.0`, 2026-07-28): in a workspace whose
+  `supportedArchitectures` lists include `current`, aube drops foreign-platform
+  optional dependencies from the lockfile. A filtered `add` prunes them
+  completely; a plain `install` prunes partially. Because `current` resolves
+  per-machine, a lockfile written on Linux loses every darwin and win32 entry,
+  and the authoring machine sees nothing wrong. Installing that lockfile while
+  targeting another platform then silently lands the wrong platform binary
+  instead of failing, since the needed entry is no longer in the file. Native
+  pnpm `11.17.0` keeps every variant in the lockfile and applies
+  `supportedArchitectures` only when choosing what to place in `node_modules`.
 
 ## Fixed
 

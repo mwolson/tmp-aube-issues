@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+
+# Mirrors a real workspace that wants the lockfile to cover the developer's own
+# platform plus Linux CI. `current` resolves per-machine, which is the point.
+supportedArchitectures:
+  cpu: [current, x64]
+  libc: [current, glibc]
+  os: [current, linux]
