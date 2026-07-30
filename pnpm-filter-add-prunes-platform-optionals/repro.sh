@@ -72,38 +72,29 @@ fi
 cd ..
 
 # Subject: the same filtered add through aube.
+# --allow-low-downloads bypasses aube's post-1.35 similar-name gate on is-odd;
+# without it the add is refused before the lockfile rewrite under test runs.
 setup
 cp .repro-baseline-lock.yaml .repro-work/pnpm-lock.yaml
 cd .repro-work
-if ! "$AUBE_BIN" --filter app add is-odd@3.0.1 --ignore-scripts >/dev/null 2>&1; then
+if ! "$AUBE_BIN" --filter app add is-odd@3.0.1 --ignore-scripts \
+    --allow-low-downloads >/dev/null 2>&1; then
     echo "aube filtered add failed" >&2
     exit 1
 fi
 after_aube="$(count_foreign)"
 
-fail=0
 if [[ "${after_aube:-0}" -ne "$baseline" ]]; then
     echo "aube pruned foreign-platform optional deps from the lockfile ($baseline -> ${after_aube:-0})" >&2
-    fail=1
-fi
-
-# The harm is only visible from another platform: installing the pruned
-# lockfile while targeting darwin silently lands the linux binary, because the
-# darwin entry no longer exists to be chosen.
-rm -rf node_modules packages/app/node_modules
-if "$PNPM_BIN" install --frozen-lockfile --ignore-scripts \
-    --config.supportedArchitectures.os=darwin \
-    --config.supportedArchitectures.cpu=arm64 >/dev/null 2>&1; then
-    if ls node_modules/.pnpm 2>/dev/null | grep -q '@esbuild+linux-x64' &&
-        ! ls node_modules/.pnpm 2>/dev/null | grep -q '@esbuild+darwin'; then
-        echo "a darwin-targeted install from the pruned lockfile placed the linux binary and no darwin binary" >&2
-        fail=1
-    fi
+    # Illustrate the consequence when pruning happened: a colleague on another
+    # platform loses the entries their machine needs. Host-side architecture
+    # overrides are unreliable as a cross-platform simulation, so the foreign
+    # entry count is the authoritative assertion.
+    cd ..
+    rm -f .repro-baseline-lock.yaml
+    exit 1
 fi
 
 cd ..
 rm -f .repro-baseline-lock.yaml
-if [[ "$fail" -ne 0 ]]; then
-    exit 1
-fi
-echo "pass: aube kept foreign-platform optional deps across the filtered add"
+echo "pass: aube kept foreign-platform optional deps across the filtered add ($baseline entries)"

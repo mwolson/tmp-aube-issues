@@ -5,44 +5,37 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`pnpm-user-npmrc-allowbuilds-read-only`](pnpm-user-npmrc-allowbuilds-read-only)
-  (observed with aube `1.32.0` and `1.34.0`, 2026-07-28): `aube config get
-  allowBuilds` reports a value from the user-level `~/.npmrc` that `aube
-  install` then ignores, so the documented way to check the setting confirms a
-  configuration that has no effect. The same allowlist in
-  `package.json#aube.allowBuilds` is honored, so the divergence is between
-  config sources rather than an unsupported setting. Follow-up to the write half
-  raised in [#617](https://github.com/jdx/aube/discussions/617), where `aube
-  config set allowBuilds.<pkg>` used to write to `~/.npmrc` with no effect; that
-  path now errors, but the read path was not changed with it. Filed as
-  [#1158](https://github.com/jdx/aube/discussions/1158).
-
-- [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
-  (observed with aube `1.32.0` and still present in `1.34.0`, 2026-07-28): in a
-  workspace whose `supportedArchitectures` lists include `current`,
-  `aube --filter <pkg> add` drops every foreign-platform optional dependency
-  from a pnpm lockfile. On `1.34.0` a plain `aube install` preserves all 45
-  esbuild platform entries while the filtered `add` on the same workspace drops
-  all 45, so the two commands disagree with each other within one version. On
-  `1.32.0` the plain install pruned partially (45 to 21).
-
-  Because `current` resolves per-machine, a lockfile written on Linux loses
-  every darwin and win32 entry and the authoring machine sees nothing wrong.
-  Installing that lockfile while targeting darwin then silently places the linux
-  binary and no darwin binary rather than failing. Native pnpm `11.17.0` keeps
-  every variant in the lockfile and applies `supportedArchitectures` only when
-  choosing what to place in `node_modules`.
-
-  Filed as [#1155](https://github.com/jdx/aube/discussions/1155).
-
-  Related to [#938](https://github.com/jdx/aube/discussions/938), which covered
-  the same class of problem for `package-lock.json` and was addressed for npm
-  lockfiles by [#942](https://github.com/jdx/aube/pull/942). That fix shipped
-  before `1.32.0` and did not cover the pnpm lockfile path. `supportedArchitectures`
-  is the workaround recommended in #938, and it is what this workspace already
-  sets.
+(none)
 
 ## Fixed
+
+- [`pnpm-user-npmrc-allowbuilds-read-only`](pnpm-user-npmrc-allowbuilds-read-only)
+  (observed with aube `1.32.0` and `1.34.0`, fixed in aube `1.35.0`, retested
+  on `1.36.0`): `aube config get allowBuilds` used to report a value from the
+  user-level `~/.npmrc` that `aube install` then ignored, so the documented way
+  to check the setting confirmed a configuration that had no effect. The same
+  allowlist in `package.json#aube.allowBuilds` was always honored. Install only
+  trusts project-scoped `allowBuilds` by design; the fix filters `.npmrc` rows
+  from config inspection for settings that do not declare that source, so
+  `config get` now returns `undefined` for a user `.npmrc` allowlist.
+  Follow-up to the write half raised in
+  [#617](https://github.com/jdx/aube/discussions/617).
+  Upstream discussion: https://github.com/jdx/aube/discussions/1158
+  Upstream fix: https://github.com/jdx/aube/pull/1159
+
+- [`pnpm-filter-add-prunes-platform-optionals`](pnpm-filter-add-prunes-platform-optionals)
+  (observed with aube `1.32.0` and `1.34.0`, fixed in aube `1.35.0`, retested
+  on `1.36.0`): in a workspace whose `supportedArchitectures` lists include
+  `current`, `aube --filter <pkg> add` used to drop every foreign-platform
+  optional dependency from a pnpm lockfile (45 esbuild platform entries to 0 on
+  `1.34.0`). Portable lockfiles now keep every platform variant while
+  fetch/link still honor `supportedArchitectures`. The repro passes
+  `--allow-low-downloads` so aube's post-1.35 similar-name gate on `is-odd`
+  does not block the add under test.
+  Related to [#938](https://github.com/jdx/aube/discussions/938) /
+  [#942](https://github.com/jdx/aube/pull/942) for the npm lockfile path.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1155
+  Upstream fix: https://github.com/jdx/aube/pull/1156
 
 - [`pnpm-file-dep-stale-store`](pnpm-file-dep-stale-store) (observed with
   aube `1.26.0`, fixed in aube `1.28.0`): a settled workspace with a nested
