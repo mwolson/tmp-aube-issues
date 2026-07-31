@@ -1,0 +1,7 @@
+{
+  "name": "pnpm-patch-edit-stale-lock-hash",
+  "private": true,
+  "dependencies": {
+    "@isaacs/string-locale-compare": "1.1.0"
+  }
+}

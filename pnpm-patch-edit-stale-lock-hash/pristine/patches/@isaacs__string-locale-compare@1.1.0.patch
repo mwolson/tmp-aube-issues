@@ -1,0 +1,10 @@
+diff --git a/index.js b/index.js
+index 0f68ab6..1d4e06e 100644
+--- a/index.js
++++ b/index.js
+@@ -40,3 +40,5 @@ module.exports = (locale, options = {}) => {
+ 
+   return compare
+ }
++
++// aube-repro original patch marker

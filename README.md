@@ -5,6 +5,19 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-patch-edit-stale-lock-hash`](pnpm-patch-edit-stale-lock-hash)
+  (observed with aube `1.36.0`): after a declared patch file's content
+  changes, `CI=1 aube install` and `aube install --frozen-lockfile` both
+  accept the stale lockfile silently, and a plain `aube install` applies the
+  new patch content to the store while leaving the old content hash in the
+  lockfile's `patchedDependencies` entry, so the installation and the
+  lockfile permanently disagree and nothing repairs or reports it. Native
+  pnpm 10.24.0 rejects the same state under `--frozen-lockfile` with
+  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. Only `aube install --force` refreshes
+  the hash, and that also re-resolves unrelated floating ranges; the
+  practical recovery is hand-editing the recorded hash. Found immediately
+  after hand-repairing the patch from `pnpm-patch-commit-existing-patch`.
+
 - [`pnpm-patch-commit-existing-patch`](pnpm-patch-commit-existing-patch)
   (observed with aube `1.36.0`): `aube patch-commit` for a package that already
   has a declared patch diffs the edit folder against the already-patched
@@ -20,6 +33,8 @@ existing npm and Bun projects.
   same flow emits a combined patch against pristine and updates the existing
   declaration in place.
   Upstream discussion: https://github.com/jdx/aube/discussions/1195
+  Fix in flight: https://github.com/jdx/aube/pull/1196 (not yet in a release
+  as of `1.36.0`; move to Fixed after a shipping release retests clean)
 
 ## Fixed
 
