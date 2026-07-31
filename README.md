@@ -19,6 +19,7 @@ existing npm and Bun projects.
   commit half diffs against the wrong baseline. pnpm's `patch-commit` in the
   same flow emits a combined patch against pristine and updates the existing
   declaration in place.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1195
 
 ## Fixed
 
