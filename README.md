@@ -17,6 +17,7 @@ existing npm and Bun projects.
   the hash, and that also re-resolves unrelated floating ranges; the
   practical recovery is hand-editing the recorded hash. Found immediately
   after hand-repairing the patch from `pnpm-patch-commit-existing-patch`.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1197
 
 - [`pnpm-patch-commit-existing-patch`](pnpm-patch-commit-existing-patch)
   (observed with aube `1.36.0`): `aube patch-commit` for a package that already
