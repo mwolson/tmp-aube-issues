@@ -1,0 +1,7 @@
+{
+  "name": "pnpm-patch-commit-existing-patch",
+  "private": true,
+  "dependencies": {
+    "@isaacs/string-locale-compare": "1.1.0"
+  }
+}

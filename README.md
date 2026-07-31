@@ -5,7 +5,20 @@ existing npm and Bun projects.
 
 ## Open
 
-(none)
+- [`pnpm-patch-commit-existing-patch`](pnpm-patch-commit-existing-patch)
+  (observed with aube `1.36.0`): `aube patch-commit` for a package that already
+  has a declared patch diffs the edit folder against the already-patched
+  baseline instead of the pristine tarball, writes that incremental-only diff
+  to a new `patches/@scope+name@version.patch` file (leaving the existing
+  pnpm-style `@scope__name@version.patch` orphaned on disk), and repoints
+  `pnpm-workspace.yaml` at it. The incremental hunks cannot apply to the
+  pristine package, so the relink inside `patch-commit` fails with "error
+  applying hunk #1" and every later `aube install` fails the same way until
+  the workspace entry and patch file are restored by hand. `aube patch` itself
+  correctly extracts the edit folder with the existing patch applied; only the
+  commit half diffs against the wrong baseline. pnpm's `patch-commit` in the
+  same flow emits a combined patch against pristine and updates the existing
+  declaration in place.
 
 ## Fixed
 

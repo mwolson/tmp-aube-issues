@@ -1,0 +1,4 @@
+packages:
+  - .
+patchedDependencies:
+  "@isaacs/string-locale-compare@1.1.0": patches/@isaacs__string-locale-compare@1.1.0.patch
