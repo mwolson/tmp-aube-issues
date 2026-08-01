@@ -5,39 +5,28 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`pnpm-patch-edit-stale-lock-hash`](pnpm-patch-edit-stale-lock-hash)
-  (observed with aube `1.36.0`): after a declared patch file's content
-  changes, `CI=1 aube install` and `aube install --frozen-lockfile` both
-  accept the stale lockfile silently, and a plain `aube install` applies the
-  new patch content to the store while leaving the old content hash in the
-  lockfile's `patchedDependencies` entry, so the installation and the
-  lockfile permanently disagree and nothing repairs or reports it. Native
-  pnpm 10.24.0 rejects the same state under `--frozen-lockfile` with
-  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. Only `aube install --force` refreshes
-  the hash, and that also re-resolves unrelated floating ranges; the
-  practical recovery is hand-editing the recorded hash. Found immediately
-  after hand-repairing the patch from `pnpm-patch-commit-existing-patch`.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1197
-
-- [`pnpm-patch-commit-existing-patch`](pnpm-patch-commit-existing-patch)
-  (observed with aube `1.36.0`): `aube patch-commit` for a package that already
-  has a declared patch diffs the edit folder against the already-patched
-  baseline instead of the pristine tarball, writes that incremental-only diff
-  to a new `patches/@scope+name@version.patch` file (leaving the existing
-  pnpm-style `@scope__name@version.patch` orphaned on disk), and repoints
-  `pnpm-workspace.yaml` at it. The incremental hunks cannot apply to the
-  pristine package, so the relink inside `patch-commit` fails with "error
-  applying hunk #1" and every later `aube install` fails the same way until
-  the workspace entry and patch file are restored by hand. `aube patch` itself
-  correctly extracts the edit folder with the existing patch applied; only the
-  commit half diffs against the wrong baseline. pnpm's `patch-commit` in the
-  same flow emits a combined patch against pristine and updates the existing
-  declaration in place.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1195
-  Fix in flight: https://github.com/jdx/aube/pull/1196 (not yet in a release
-  as of `1.36.0`; move to Fixed after a shipping release retests clean)
+None.
 
 ## Fixed
+
+- [`pnpm-patch-edit-stale-lock-hash`](pnpm-patch-edit-stale-lock-hash)
+  (observed with aube `1.36.0`, fixed in aube `1.37.0`, retested on `1.37.0`):
+  after a declared patch file's content changed, frozen installs used to accept
+  the stale lockfile silently while a plain install applied the new patch but
+  retained the old content hash. Frozen installs now reject the drift with
+  `ERR_AUBE_LOCKFILE_CONFIG_MISMATCH`, and a plain install applies the revised
+  patch and refreshes the lockfile hash.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1197
+  Upstream fix: https://github.com/jdx/aube/pull/1196
+
+- [`pnpm-patch-commit-existing-patch`](pnpm-patch-commit-existing-patch)
+  (observed with aube `1.36.0`, fixed in aube `1.37.0`, retested on `1.37.0`):
+  `aube patch-commit` for an already-patched package used to replace the
+  declared patch with an incremental-only diff that could not apply to pristine
+  package contents. It now reuses the existing patch path and composes the old
+  patch with the new edits, producing a patch that survives a clean reinstall.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1195
+  Upstream fix: https://github.com/jdx/aube/pull/1196
 
 - [`pnpm-user-npmrc-allowbuilds-read-only`](pnpm-user-npmrc-allowbuilds-read-only)
   (observed with aube `1.32.0` and `1.34.0`, fixed in aube `1.35.0`, retested
@@ -198,7 +187,7 @@ existing npm and Bun projects.
 ## Mitigated
 
 - [`package-config-symlink-resolution`](package-config-symlink-resolution)
-  (observed with aube `1.15.0`, still present with aube `1.31.0` in default
+  (observed with aube `1.15.0`, still present with aube `1.37.0` in default
   isolated mode): aube installs a package whose config file requires one of that
   package's declared dependencies, but loading that config through the package's
   top-level `node_modules/<pkg>` symlink cannot resolve the declared dependency.
@@ -215,7 +204,7 @@ existing npm and Bun projects.
   `AUBE_NODE_LINKER=hoisted` unless the caller already selected a node linker.
   Upstream discussion: https://github.com/jdx/aube/discussions/754
 - [`install-omit-optional`](install-omit-optional) (observed with aube
-  `1.14.1`, still present with aube `1.31.0`): aube rejects
+  `1.14.1`, still present with aube `1.37.0`): aube rejects
   `aube install --omit optional` with an unexpected argument error. This blocks
   npm/Bun-compatible production install commands that use `--omit optional`;
   aube's documented equivalent is `--no-optional`. Mitigated in aubeshim,
