@@ -18,6 +18,7 @@ existing npm and Bun projects.
   and ended up with many physical `effect` trees under workspace packages.
   Docs: https://aube.jdx.dev/package-manager/node-modules,
   https://aube.jdx.dev/package-manager/workspaces
+  Upstream discussion: https://github.com/jdx/aube/discussions/1242
 
 - [`pnpm-min-release-age`](pnpm-min-release-age) (observed with aube
   `1.37.0`, retested on `1.37.0`): aube documents pnpm 11's default
