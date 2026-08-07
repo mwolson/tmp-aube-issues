@@ -23,6 +23,7 @@ existing npm and Bun projects.
   Docs: https://aube.jdx.dev/security,
   https://aube.jdx.dev/settings/#setting-minimumreleaseage,
   https://pnpm.io/supply-chain-security
+  Upstream discussion: https://github.com/jdx/aube/discussions/1240
 
 ## Fixed
 
