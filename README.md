@@ -5,7 +5,24 @@ existing npm and Bun projects.
 
 ## Open
 
-None.
+- [`pnpm-min-release-age`](pnpm-min-release-age) (observed with aube
+  `1.37.0`, retested on `1.37.0`): aube documents pnpm 11's default
+  `minimumReleaseAge: 1440` (24h), but under the default
+  `minimumReleaseAgeStrict: false` it still installs an exact pin whose only
+  matching version was published "now", and it does not re-verify published
+  age for existing lockfile entries. Native pnpm 11 rejects the same tree
+  with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` on cold resolve and
+  `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` when reinstalling from a lockfile
+  that already pins the young version. Setting `minimumReleaseAgeStrict: true`
+  makes aube reject on resolve (`ERR_AUBE_NO_MATURE_MATCHING_VERSION`), but
+  that is not the pnpm 11 default. The repro uses a local mock registry that
+  always reports `publishedAt=now` so the case is durable without a same-day
+  public publish. First seen installing
+  `@opencode-ai/sdk@0.0.0-beta-202608061351` in a monorepo that relied on the
+  pnpm 11 default age gate (no explicit `minimumReleaseAge` key).
+  Docs: https://aube.jdx.dev/security,
+  https://aube.jdx.dev/settings/#setting-minimumreleaseage,
+  https://pnpm.io/supply-chain-security
 
 ## Fixed
 
