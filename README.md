@@ -5,6 +5,20 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (observed with aube `1.37.0`, retested on `1.37.0`): in a two-package
+  workspace that pins the same version of a dependency in both packages,
+  `aube install --node-linker=isolated` makes both importers share one
+  realpath under `node_modules/.aube/...`, while
+  `aube install --node-linker=hoisted` materializes distinct real directories
+  at each package's `node_modules/<dep>` (not symlinks). Package *files* may
+  share inodes (hardlinks from the store), but the package root realpaths
+  still differ, so Node and bundlers load multiple module instances. First
+  seen on a large Expo/Metro monorepo that forced hoisted for in-tree resolve
+  and ended up with many physical `effect` trees under workspace packages.
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces
+
 - [`pnpm-min-release-age`](pnpm-min-release-age) (observed with aube
   `1.37.0`, retested on `1.37.0`): aube documents pnpm 11's default
   `minimumReleaseAge: 1440` (24h), but under the default

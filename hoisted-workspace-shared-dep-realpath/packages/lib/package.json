@@ -1,0 +1,7 @@
+{
+  "name": "@repro/lib",
+  "private": true,
+  "dependencies": {
+    "is-number": "7.0.0"
+  }
+}
