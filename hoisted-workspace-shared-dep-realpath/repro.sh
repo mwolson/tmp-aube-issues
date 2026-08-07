@@ -6,8 +6,8 @@ if ! command -v aube >/dev/null 2>&1; then
     exit 2
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-    echo "python3 is required" >&2
+if ! command -v node >/dev/null 2>&1; then
+    echo "node is required" >&2
     exit 2
 fi
 
@@ -17,65 +17,96 @@ clean_modules() {
     rm -rf node_modules packages/app/node_modules packages/lib/node_modules
 }
 
+# Package-root identity via Node resolution from each importer.
+# After the hoisted workspace-wide plan fix, packages/*/node_modules/is-number
+# may be intentionally absent (both importers resolve up to root node_modules).
+# Comparing require.resolve realpaths is the stable assertion either way.
 print_layout() {
     local label="$1"
     echo "=== $label ==="
     echo "aube: $(aube --version 2>/dev/null | head -1)"
-    python3 - <<'PY'
-import os
-from pathlib import Path
+    node -e '
+const fs = require("fs");
+const path = require("path");
 
-pairs = [
-    ("packages/app/node_modules/is-number", "packages/lib/node_modules/is-number"),
-]
-for a, b in pairs:
-    pa, pb = Path(a), Path(b)
-    if not pa.exists() or not pb.exists():
-        print(f"missing: {a} exists={pa.exists()} {b} exists={pb.exists()}")
-        continue
-    ra, rb = os.path.realpath(a), os.path.realpath(b)
-    print(f"app  is-number: path={a}")
-    print(f"      realpath={ra}")
-    print(f"      islink={os.path.islink(a)} isdir={pa.is_dir()}")
-    print(f"lib  is-number: path={b}")
-    print(f"      realpath={rb}")
-    print(f"      islink={os.path.islink(b)} isdir={pb.is_dir()}")
-    print(f"same realpath: {ra == rb}")
-PY
+const importers = ["packages/app", "packages/lib"];
+const results = [];
+
+for (const importer of importers) {
+  const local = path.join(importer, "node_modules", "is-number");
+  const localExists = fs.existsSync(local);
+  let resolved = null;
+  let real = null;
+  let err = null;
+  try {
+    resolved = require.resolve("is-number", { paths: [path.resolve(importer)] });
+    real = fs.realpathSync(path.dirname(resolved));
+  } catch (e) {
+    err = e.message;
+  }
+  results.push({ importer, local, localExists, resolved, real, err });
+  console.log(`${importer}:`);
+  console.log(`  local path: ${local}`);
+  console.log(`  local exists: ${localExists}${localExists ? ` islink=${fs.lstatSync(local).isSymbolicLink()}` : ""}`);
+  if (err) {
+    console.log(`  resolve: ERROR ${err}`);
+  } else {
+    console.log(`  resolve: ${resolved}`);
+    console.log(`  package realpath: ${real}`);
+  }
 }
 
-# Baseline: isolated should share one physical instance.
+const reals = results.map((r) => r.real).filter(Boolean);
+if (reals.length === 2) {
+  console.log(`same resolve realpath: ${reals[0] === reals[1]}`);
+} else {
+  console.log("same resolve realpath: false (resolve failed for one or both importers)");
+}
+'
+}
+
+resolved_same() {
+    node -e '
+const fs = require("fs");
+const path = require("path");
+function pkgReal(importer) {
+  const resolved = require.resolve("is-number", { paths: [path.resolve(importer)] });
+  return fs.realpathSync(path.dirname(resolved));
+}
+try {
+  const a = pkgReal("packages/app");
+  const b = pkgReal("packages/lib");
+  process.stdout.write(a === b ? "true" : "false");
+} catch {
+  process.stdout.write("false");
+}
+'
+}
+
+# Baseline: isolated should share one physical instance via resolution.
 clean_modules
 aube install --node-linker=isolated --ignore-scripts --reporter append-only
 print_layout "isolated"
-isolated_same="$(python3 - <<'PY'
-import os
-print(os.path.realpath("packages/app/node_modules/is-number") ==
-      os.path.realpath("packages/lib/node_modules/is-number"))
-PY
-)"
-if [[ "$isolated_same" != "True" ]]; then
-    echo "setup failed: isolated install did not share is-number realpath" >&2
+isolated_same="$(resolved_same)"
+if [[ "$isolated_same" != "true" ]]; then
+    echo "setup failed: isolated install did not share is-number resolve realpath" >&2
     exit 2
 fi
 
-# Case under test: hoisted materializes separate real directories per workspace.
+# Case under test: hoisted should share one package-root realpath across
+# workspace importers (pnpm-compatible). Pre-fix aube planned separate trees
+# per importer; post-fix both resolve to the same root placement.
 clean_modules
 aube install --node-linker=hoisted --ignore-scripts --reporter append-only
 print_layout "hoisted"
 
-hoisted_same="$(python3 - <<'PY'
-import os
-print(os.path.realpath("packages/app/node_modules/is-number") ==
-      os.path.realpath("packages/lib/node_modules/is-number"))
-PY
-)"
+hoisted_same="$(resolved_same)"
 
-if [[ "$hoisted_same" == "True" ]]; then
-    echo "pass: hoisted install shares is-number realpath across workspace packages"
+if [[ "$hoisted_same" == "true" ]]; then
+    echo "pass: hoisted install shares is-number resolve realpath across workspace packages"
     exit 0
 fi
 
-echo "failed: hoisted install uses distinct is-number realpaths per workspace package" >&2
-echo "expected: same realpath (hardlink/symlink to one store-backed tree)" >&2
+echo "failed: hoisted install resolves is-number to distinct realpaths per workspace package" >&2
+echo "expected: same require.resolve realpath from each importer (may be root node_modules)" >&2
 exit 1

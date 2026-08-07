@@ -6,19 +6,30 @@ existing npm and Bun projects.
 ## Open
 
 - [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
-  (observed with aube `1.37.0`, retested on `1.37.0`): in a two-package
-  workspace that pins the same version of a dependency in both packages,
-  `aube install --node-linker=isolated` makes both importers share one
+  (observed with aube `1.37.0`, retested on `1.37.0`; fix merged on main in
+  [#1243](https://github.com/jdx/aube/pull/1243), not yet in a released tag):
+  in a two-package workspace that pins the same version of a dependency in both
+  packages, `aube install --node-linker=isolated` makes both importers share one
   realpath under `node_modules/.aube/...`, while
-  `aube install --node-linker=hoisted` materializes distinct real directories
-  at each package's `node_modules/<dep>` (not symlinks). Package *files* may
-  share inodes (hardlinks from the store), but the package root realpaths
-  still differ, so Node and bundlers load multiple module instances. First
-  seen on a large Expo/Metro monorepo that forced hoisted for in-tree resolve
-  and ended up with many physical `effect` trees under workspace packages.
+  `aube install --node-linker=hoisted` on `1.37.0` materializes distinct real
+  directories at each package's `node_modules/<dep>` (not symlinks). Package
+  *files* may share inodes (hardlinks from the store), but the package root
+  realpaths still differ, so Node and bundlers load multiple module instances.
+  The repro asserts identity with `require.resolve("is-number", { paths })`
+  from each importer, because after the fix package-local
+  `node_modules/is-number` slots may be absent and both importers resolve up to
+  one workspace-root placement (pnpm-compatible). First seen on a large
+  Expo/Metro monorepo that forced hoisted for in-tree resolve and ended up with
+  many physical `effect` trees under workspace packages.
   Docs: https://aube.jdx.dev/package-manager/node-modules,
   https://aube.jdx.dev/package-manager/workspaces
   Upstream discussion: https://github.com/jdx/aube/discussions/1242
+  Upstream fix (merged, unreleased): https://github.com/jdx/aube/pull/1243
+
+## Intentional
+
+Confirmed aube design differences from pnpm (or other managers). Kept for
+migration notes; the repro still exits non-zero while the difference holds.
 
 - [`pnpm-min-release-age`](pnpm-min-release-age) (observed with aube
   `1.37.0`, retested on `1.37.0`): aube documents pnpm 11's default
@@ -29,16 +40,23 @@ existing npm and Bun projects.
   with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` on cold resolve and
   `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` when reinstalling from a lockfile
   that already pins the young version. Setting `minimumReleaseAgeStrict: true`
-  makes aube reject on resolve (`ERR_AUBE_NO_MATURE_MATCHING_VERSION`), but
-  that is not the pnpm 11 default. The repro uses a local mock registry that
-  always reports `publishedAt=now` so the case is durable without a same-day
-  public publish. First seen installing
-  `@opencode-ai/sdk@0.0.0-beta-202608061351` in a monorepo that relied on the
-  pnpm 11 default age gate (no explicit `minimumReleaseAge` key).
+  makes aube reject on resolve (`ERR_AUBE_NO_MATURE_MATCHING_VERSION`).
+  Maintainer confirmed this is intentional: lockfile pins are authoritative,
+  and the age gate applies when resolving a new version rather than
+  revalidating existing lock entries; strict mode is the opt-in hard fail on
+  fresh resolve. The associated fix PR was closed without merge. The repro uses
+  a local mock registry that always reports `publishedAt=now` so the case is
+  durable without a same-day public publish. Migration note: projects that
+  relied on pnpm 11's default hard age gate should set
+  `minimumReleaseAgeStrict: true` (and not expect lockfile re-verification).
+  First seen installing `@opencode-ai/sdk@0.0.0-beta-202608061351` in a
+  monorepo that relied on the pnpm 11 default age gate (no explicit
+  `minimumReleaseAge` key).
   Docs: https://aube.jdx.dev/security,
   https://aube.jdx.dev/settings/#setting-minimumreleaseage,
   https://pnpm.io/supply-chain-security
   Upstream discussion: https://github.com/jdx/aube/discussions/1240
+  Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
 
