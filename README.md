@@ -3,29 +3,6 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
-## Open
-
-- [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
-  (observed with aube `1.37.0`, retested on `1.37.0`; fix merged on main in
-  [#1243](https://github.com/jdx/aube/pull/1243), not yet in a released tag):
-  in a two-package workspace that pins the same version of a dependency in both
-  packages, `aube install --node-linker=isolated` makes both importers share one
-  realpath under `node_modules/.aube/...`, while
-  `aube install --node-linker=hoisted` on `1.37.0` materializes distinct real
-  directories at each package's `node_modules/<dep>` (not symlinks). Package
-  *files* may share inodes (hardlinks from the store), but the package root
-  realpaths still differ, so Node and bundlers load multiple module instances.
-  The repro asserts identity with `require.resolve("is-number", { paths })`
-  from each importer, because after the fix package-local
-  `node_modules/is-number` slots may be absent and both importers resolve up to
-  one workspace-root placement (pnpm-compatible). First seen on a large
-  Expo/Metro monorepo that forced hoisted for in-tree resolve and ended up with
-  many physical `effect` trees under workspace packages.
-  Docs: https://aube.jdx.dev/package-manager/node-modules,
-  https://aube.jdx.dev/package-manager/workspaces
-  Upstream discussion: https://github.com/jdx/aube/discussions/1242
-  Upstream fix (merged, unreleased): https://github.com/jdx/aube/pull/1243
-
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
@@ -59,6 +36,23 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (observed with aube `1.37.0`, fixed in aube `1.38.1`, retested on `1.38.1`):
+  in a two-package workspace that pins the same version of a dependency in both
+  packages, `aube install --node-linker=hoisted` used to materialize distinct
+  real directories at each package's `node_modules/<dep>`, so Node and bundlers
+  loaded multiple module instances. The linker now plans one workspace-wide
+  hoisted tree; with default `hoistingLimits=none`, compatible deps hoist to a
+  single workspace-root placement. Package-local `node_modules/<dep>` slots may
+  be absent; the repro asserts identity with
+  `require.resolve(..., { paths })` from each importer. First seen on a large
+  Expo/Metro monorepo that forced hoisted for in-tree resolve and ended up with
+  many physical `effect` trees under workspace packages.
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces
+  Upstream discussion: https://github.com/jdx/aube/discussions/1242
+  Upstream fix: https://github.com/jdx/aube/pull/1243
 
 - [`pnpm-patch-edit-stale-lock-hash`](pnpm-patch-edit-stale-lock-hash)
   (observed with aube `1.36.0`, fixed in aube `1.37.0`, retested on `1.37.0`):
