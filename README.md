@@ -28,6 +28,7 @@ existing npm and Bun projects.
   recording, not unrelated version hoists;
   [`npm-lock-missing-entry`](npm-lock-missing-entry) is a different
   `--fix-lockfile` missing-path case.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1286
 
 ## Intentional
 
