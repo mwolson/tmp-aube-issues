@@ -3,6 +3,32 @@
 Minimal repros for aube compatibility issues found while testing
 existing npm and Bun projects.
 
+## Open
+
+- [`npm-lock-add-reresolve`](npm-lock-add-reresolve) (observed with aube
+  `1.38.1`): `aube install` treats a fresh npm `package-lock.json` as
+  up to date, but `aube add` of a named spec re-resolves unrelated hoisted
+  versions. The fixture pins `jest-config@29.7.0` exactly. The lockfile was
+  produced by npm `11.17.0` with `npm install --ignore-scripts
+  --package-lock-only --no-audit --no-fund`; npm `12.0.2` left that lock
+  byte-identical. npm hoists `camelcase@5.3.1` and nests `camelcase@6.3.0`
+  under `jest-validate`. Real `npm install is-number@7.0.0` only promotes
+  that already-transitive package. `aube add is-number@7.0.0` hoists
+  `camelcase` to `6.3.0`. The same rewrite happens for
+  `aube add jest-config@29.7.0` (already the exact pin) and
+  `aube install --fix-lockfile`, with either isolated or hoisted
+  `AUBE_NODE_LINKER`. Smaller trees (`express`, `esbuild`, a two-package
+  `camelcase` pair) do not reproduce the hoist.
+  Docs: https://aube.jdx.dev/package-manager/install,
+  https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/package-manager/dependencies
+  Related: [#1155](https://github.com/jdx/aube/discussions/1155) expected an
+  `add` lock diff to contain only the new package;
+  [#938](https://github.com/jdx/aube/discussions/938) is optional-native
+  recording, not unrelated version hoists;
+  [`npm-lock-missing-entry`](npm-lock-missing-entry) is a different
+  `--fix-lockfile` missing-path case.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for

@@ -1,0 +1,8 @@
+{
+  "name": "aube-npm-lock-add-reresolve",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "jest-config": "29.7.0"
+  }
+}
