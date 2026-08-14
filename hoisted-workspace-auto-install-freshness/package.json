@@ -1,0 +1,7 @@
+{
+  "name": "hoisted-workspace-auto-install-freshness",
+  "private": true,
+  "scripts": {
+    "ok": "node -e \"process.stdout.write('ok\\n')\""
+  }
+}

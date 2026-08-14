@@ -5,6 +5,31 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
+  (observed with aube `1.40.0`): after a valid hoisted workspace install, a
+  member-only direct dependency lives at the workspace-root
+  `node_modules/<dep>` and the package-local
+  `packages/<pkg>/node_modules/<dep>` slot is intentionally absent. Node
+  resolves the dependency through the root placement. `aube run` and
+  `aube exec` still report `installed entry missing` for that absent slot
+  and reinstall on every invocation. `AUBE_NO_AUTO_INSTALL=1` and
+  `--no-install` skip the check. Direct `aube run ok` reproduces without
+  aubeshim when the workspace or env keeps `node-linker=hoisted`; without
+  that, the first auto-install rewrites the tree to isolated and the
+  second run stays warm. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (shared package-root identity, fixed in aube `1.38.1`). Native pnpm
+  `11.21.0` uses the same root-only hoisted placement.
+  Docs: https://aube.jdx.dev/package-manager/install,
+  https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces,
+  https://aube.jdx.dev/settings/#setting-aubenoautoinstall
+  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
+  [#1243](https://github.com/jdx/aube/pull/1243) made the package-local
+  slot intentionally absent;
+  [#188](https://github.com/jdx/aube/pull/188) added the warm-path
+  `direct_entries` existence check.
+
 - [`npm-lock-add-reresolve`](npm-lock-add-reresolve) (observed with aube
   `1.38.1`): `aube install` treats a fresh npm `package-lock.json` as
   up to date, but `aube add` of a named spec re-resolves unrelated hoisted
