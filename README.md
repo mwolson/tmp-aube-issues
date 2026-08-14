@@ -29,6 +29,7 @@ existing npm and Bun projects.
   slot intentionally absent;
   [#188](https://github.com/jdx/aube/pull/188) added the warm-path
   `direct_entries` existence check.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1292
 
 - [`npm-lock-add-reresolve`](npm-lock-add-reresolve) (observed with aube
   `1.38.1`): `aube install` treats a fresh npm `package-lock.json` as
