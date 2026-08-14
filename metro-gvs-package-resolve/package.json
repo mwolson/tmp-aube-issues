@@ -1,0 +1,10 @@
+{
+  "name": "metro-gvs-package-resolve",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "is-number": "7.0.0",
+    "metro": "0.84.4",
+    "metro-config": "0.84.4"
+  }
+}

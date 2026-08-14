@@ -5,6 +5,33 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (observed with aube
+  `1.40.0`): isolated installs with the default-on global virtual store
+  make `node_modules/<pkg>` a symlink whose realpath is
+  `$XDG_CACHE_HOME/aube/virtual-store/...`. Node resolves that package.
+  Metro 0.84.4 does not: `Metro.buildGraph` reports
+  `Unable to resolve module is-number` and, if `extraNodeModules` points
+  at the realpath, lists that GVS path as an extra search directory and
+  still fails. Adding the GVS package realpath to Metro `watchFolders`
+  fixes it. `aube install --disable-global-virtual-store` and
+  `node-linker=hoisted` keep the realpath inside the project and Metro
+  succeeds. Native pnpm `11.21.0` isolated also succeeds because
+  `.pnpm/` stays in the project; pnpm with
+  `enableGlobalVirtualStore=true` fails the same way. First seen as
+  Metro `Unable to resolve "expo/virtual/env"` in an Expo 56 app after
+  Babel injected that import. aubeshim's hoisted linker injection is not
+  required to reproduce this. `metro`, `expo`, and `react-native` are
+  not on the default `disableGlobalVirtualStoreForPackages` list.
+  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
+  https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/troubleshooting,
+  https://metrobundler.dev/docs/configuration/#watchfolders
+  Related: [#32](https://github.com/jdx/aube/pull/32) /
+  [#101](https://github.com/jdx/aube/pull/101) added the GVS auto-disable
+  list; [#117](https://github.com/jdx/aube/pull/117) dropped names that
+  lacked a concrete repro; [#754](https://github.com/jdx/aube/discussions/754)
+  is isolated config-loader resolution, not Metro's file map.
+
 - [`hoisted-react-peer-duplication`](hoisted-react-peer-duplication)
   (observed with aube `1.40.0`): in a two-importer workspace, the
   alphabetically earlier package pins `react@19.2.3` and the later one pins
