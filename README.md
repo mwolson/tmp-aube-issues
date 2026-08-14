@@ -31,6 +31,7 @@ existing npm and Bun projects.
   list; [#117](https://github.com/jdx/aube/pull/117) dropped names that
   lacked a concrete repro; [#754](https://github.com/jdx/aube/discussions/754)
   is isolated config-loader resolution, not Metro's file map.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1294
 
 - [`hoisted-react-peer-duplication`](hoisted-react-peer-duplication)
   (observed with aube `1.40.0`): in a two-importer workspace, the
