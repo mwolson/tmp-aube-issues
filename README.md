@@ -5,6 +5,29 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`hoisted-react-peer-duplication`](hoisted-react-peer-duplication)
+  (observed with aube `1.40.0`): in a two-importer workspace, the
+  alphabetically earlier package pins `react@19.2.3` and the later one pins
+  `react@19.2.6` plus `zustand@5.0.11` (`peer react: ">=18.0.0"`, optional).
+  Isolated aube shares one `react@19.2.6` realpath between web and zustand.
+  `aube install --node-linker=hoisted` lets mobile claim the workspace-root
+  `react` slot with `19.2.3`, then materializes `19.2.6` twice
+  (`packages/web/node_modules/react` and
+  `node_modules/zustand/node_modules/react`). Node loads two module
+  identities of the same version. Native pnpm `11.21.0` and `10.24.0`
+  hoisted place `19.2.6` once at the workspace root and nest only
+  `19.2.3` under mobile. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (same version across importers, fixed in aube `1.38.1`) and from
+  [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
+  (warm-path slot check).
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces
+  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
+  [#1243](https://github.com/jdx/aube/pull/1243) shared one physical
+  package for compatible hoisted deps; this leftover is the
+  conflict-nest path for the same version.
+
 - [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
   (observed with aube `1.40.0`): after a valid hoisted workspace install, a
   member-only direct dependency lives at the workspace-root
