@@ -27,6 +27,7 @@ existing npm and Bun projects.
   [#1243](https://github.com/jdx/aube/pull/1243) shared one physical
   package for compatible hoisted deps; this leftover is the
   conflict-nest path for the same version.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1293
 
 - [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
   (observed with aube `1.40.0`): after a valid hoisted workspace install, a
