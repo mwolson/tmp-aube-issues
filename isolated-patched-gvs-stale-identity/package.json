@@ -1,0 +1,8 @@
+{
+  "name": "isolated-patched-gvs-stale-identity",
+  "private": true,
+  "dependencies": {
+    "is-number": "7.0.0",
+    "to-regex-range": "5.0.1"
+  }
+}

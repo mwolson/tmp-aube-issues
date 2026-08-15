@@ -5,6 +5,27 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`isolated-patched-gvs-stale-identity`](isolated-patched-gvs-stale-identity)
+  (observed with aube `1.40.0`): isolated installs with the default-on
+  global virtual store can leave a third-party package's sibling
+  `node_modules/<dep>` pointing at a different store identity than the
+  project importer. A warm `aube install` does not rewrite that nested
+  GVS link. `--disable-global-virtual-store` does repair it. First seen
+  when a patched `effect@4.0.0-beta.103` existed as both
+  `effect@4.0.0-beta.103-<hash>` and
+  `effect@4.0.0-beta.103_patch_hash=...` and Rolldown inlined both,
+  splitting Effect's pre-response WeakMap. Native pnpm `11.21.0`
+  isolated keeps one `is-number@7.0.0_patch_hash=...` identity for the
+  app and `to-regex-range`. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (hoisted, same version, fixed in `1.38.1`) and from
+  [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (Metro file
+  map, not Node identity).
+  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
+  https://aube.jdx.dev/package-manager/node-modules
+  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
+  [#1243](https://github.com/jdx/aube/pull/1243)
+
 - [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (observed with aube
   `1.40.0`): isolated installs with the default-on global virtual store
   make `node_modules/<pkg>` a symlink whose realpath is
