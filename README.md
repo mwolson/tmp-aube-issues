@@ -25,6 +25,7 @@ existing npm and Bun projects.
   https://aube.jdx.dev/package-manager/node-modules
   Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
   [#1243](https://github.com/jdx/aube/pull/1243)
+  Upstream discussion: https://github.com/jdx/aube/discussions/1298
 
 - [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (observed with aube
   `1.40.0`): isolated installs with the default-on global virtual store
