@@ -5,130 +5,7 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`isolated-patched-gvs-stale-identity`](isolated-patched-gvs-stale-identity)
-  (observed with aube `1.40.0`): isolated installs with the default-on
-  global virtual store can leave a third-party package's sibling
-  `node_modules/<dep>` pointing at a different store identity than the
-  project importer. A warm `aube install` does not rewrite that nested
-  GVS link. `--disable-global-virtual-store` does repair it. First seen
-  when a patched `effect@4.0.0-beta.103` existed as both
-  `effect@4.0.0-beta.103-<hash>` and
-  `effect@4.0.0-beta.103_patch_hash=...` and Rolldown inlined both,
-  splitting Effect's pre-response WeakMap. Native pnpm `11.21.0`
-  isolated keeps one `is-number@7.0.0_patch_hash=...` identity for the
-  app and `to-regex-range`. Distinct from
-  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
-  (hoisted, same version, fixed in `1.38.1`) and from
-  [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (Metro file
-  map, not Node identity).
-  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
-  https://aube.jdx.dev/package-manager/node-modules
-  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
-  [#1243](https://github.com/jdx/aube/pull/1243)
-  Upstream discussion: https://github.com/jdx/aube/discussions/1298
-
-- [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (observed with aube
-  `1.40.0`): isolated installs with the default-on global virtual store
-  make `node_modules/<pkg>` a symlink whose realpath is
-  `$XDG_CACHE_HOME/aube/virtual-store/...`. Node resolves that package.
-  Metro 0.84.4 does not: `Metro.buildGraph` reports
-  `Unable to resolve module is-number` and, if `extraNodeModules` points
-  at the realpath, lists that GVS path as an extra search directory and
-  still fails. Adding the GVS package realpath to Metro `watchFolders`
-  fixes it. `aube install --disable-global-virtual-store` and
-  `node-linker=hoisted` keep the realpath inside the project and Metro
-  succeeds. Native pnpm `11.21.0` isolated also succeeds because
-  `.pnpm/` stays in the project; pnpm with
-  `enableGlobalVirtualStore=true` fails the same way. First seen as
-  Metro `Unable to resolve "expo/virtual/env"` in an Expo 56 app after
-  Babel injected that import. aubeshim's hoisted linker injection is not
-  required to reproduce this. `metro`, `expo`, and `react-native` are
-  not on the default `disableGlobalVirtualStoreForPackages` list.
-  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
-  https://aube.jdx.dev/package-manager/node-modules,
-  https://aube.jdx.dev/troubleshooting,
-  https://metrobundler.dev/docs/configuration/#watchfolders
-  Related: [#32](https://github.com/jdx/aube/pull/32) /
-  [#101](https://github.com/jdx/aube/pull/101) added the GVS auto-disable
-  list; [#117](https://github.com/jdx/aube/pull/117) dropped names that
-  lacked a concrete repro; [#754](https://github.com/jdx/aube/discussions/754)
-  is isolated config-loader resolution, not Metro's file map.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1294
-
-- [`hoisted-react-peer-duplication`](hoisted-react-peer-duplication)
-  (observed with aube `1.40.0`): in a two-importer workspace, the
-  alphabetically earlier package pins `react@19.2.3` and the later one pins
-  `react@19.2.6` plus `zustand@5.0.11` (`peer react: ">=18.0.0"`, optional).
-  Isolated aube shares one `react@19.2.6` realpath between web and zustand.
-  `aube install --node-linker=hoisted` lets mobile claim the workspace-root
-  `react` slot with `19.2.3`, then materializes `19.2.6` twice
-  (`packages/web/node_modules/react` and
-  `node_modules/zustand/node_modules/react`). Node loads two module
-  identities of the same version. Native pnpm `11.21.0` and `10.24.0`
-  hoisted place `19.2.6` once at the workspace root and nest only
-  `19.2.3` under mobile. Distinct from
-  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
-  (same version across importers, fixed in aube `1.38.1`) and from
-  [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
-  (warm-path slot check).
-  Docs: https://aube.jdx.dev/package-manager/node-modules,
-  https://aube.jdx.dev/package-manager/workspaces
-  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
-  [#1243](https://github.com/jdx/aube/pull/1243) shared one physical
-  package for compatible hoisted deps; this leftover is the
-  conflict-nest path for the same version.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1293
-
-- [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
-  (observed with aube `1.40.0`): after a valid hoisted workspace install, a
-  member-only direct dependency lives at the workspace-root
-  `node_modules/<dep>` and the package-local
-  `packages/<pkg>/node_modules/<dep>` slot is intentionally absent. Node
-  resolves the dependency through the root placement. `aube run` and
-  `aube exec` still report `installed entry missing` for that absent slot
-  and reinstall on every invocation. `AUBE_NO_AUTO_INSTALL=1` and
-  `--no-install` skip the check. Direct `aube run ok` reproduces without
-  aubeshim when the workspace or env keeps `node-linker=hoisted`; without
-  that, the first auto-install rewrites the tree to isolated and the
-  second run stays warm. Distinct from
-  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
-  (shared package-root identity, fixed in aube `1.38.1`). Native pnpm
-  `11.21.0` uses the same root-only hoisted placement.
-  Docs: https://aube.jdx.dev/package-manager/install,
-  https://aube.jdx.dev/package-manager/node-modules,
-  https://aube.jdx.dev/package-manager/workspaces,
-  https://aube.jdx.dev/settings/#setting-aubenoautoinstall
-  Related: [#1242](https://github.com/jdx/aube/discussions/1242) /
-  [#1243](https://github.com/jdx/aube/pull/1243) made the package-local
-  slot intentionally absent;
-  [#188](https://github.com/jdx/aube/pull/188) added the warm-path
-  `direct_entries` existence check.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1292
-
-- [`npm-lock-add-reresolve`](npm-lock-add-reresolve) (observed with aube
-  `1.38.1`): `aube install` treats a fresh npm `package-lock.json` as
-  up to date, but `aube add` of a named spec re-resolves unrelated hoisted
-  versions. The fixture pins `jest-config@29.7.0` exactly. The lockfile was
-  produced by npm `11.17.0` with `npm install --ignore-scripts
-  --package-lock-only --no-audit --no-fund`; npm `12.0.2` left that lock
-  byte-identical. npm hoists `camelcase@5.3.1` and nests `camelcase@6.3.0`
-  under `jest-validate`. Real `npm install is-number@7.0.0` only promotes
-  that already-transitive package. `aube add is-number@7.0.0` hoists
-  `camelcase` to `6.3.0`. The same rewrite happens for
-  `aube add jest-config@29.7.0` (already the exact pin) and
-  `aube install --fix-lockfile`, with either isolated or hoisted
-  `AUBE_NODE_LINKER`. Smaller trees (`express`, `esbuild`, a two-package
-  `camelcase` pair) do not reproduce the hoist.
-  Docs: https://aube.jdx.dev/package-manager/install,
-  https://aube.jdx.dev/package-manager/lockfiles,
-  https://aube.jdx.dev/package-manager/dependencies
-  Related: [#1155](https://github.com/jdx/aube/discussions/1155) expected an
-  `add` lock diff to contain only the new package;
-  [#938](https://github.com/jdx/aube/discussions/938) is optional-native
-  recording, not unrelated version hoists;
-  [`npm-lock-missing-entry`](npm-lock-missing-entry) is a different
-  `--fix-lockfile` missing-path case.
-  Upstream discussion: https://github.com/jdx/aube/discussions/1286
+None.
 
 ## Intentional
 
@@ -163,6 +40,165 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`isolated-patched-gvs-stale-identity`](isolated-patched-gvs-stale-identity)
+  (observed with aube `1.40.0`, fixed in aube `1.41.0`, retested on
+  `1.41.0`): isolated installs with the default-on global virtual store used
+  to leave a third-party package's sibling `node_modules/<dep>` pointing at a
+  different store identity than the project importer. A warm `aube install`
+  did not rewrite that nested GVS link, while
+  `--disable-global-virtual-store` repaired it. Aube `1.41.0` now reconciles
+  stale, missing, and incorrectly targeted nested links during warm installs
+  and GVS cache hits. First seen
+  when a patched `effect@4.0.0-beta.103` existed as both
+  `effect@4.0.0-beta.103-<hash>` and
+  `effect@4.0.0-beta.103_patch_hash=...` and Rolldown inlined both,
+  splitting Effect's pre-response WeakMap. Native pnpm `11.21.0`
+  isolated keeps one `is-number@7.0.0_patch_hash=...` identity for the
+  app and `to-regex-range`. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (hoisted, same version, fixed in `1.38.1`) and from
+  [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (Metro file
+  map, not Node identity).
+  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
+  https://aube.jdx.dev/package-manager/node-modules
+  Related:
+  [#1242 hoisted-shared-realpath](https://github.com/jdx/aube/discussions/1242) /
+  [#1243 workspace-hoisted-planner](https://github.com/jdx/aube/pull/1243)
+  Upstream discussion: https://github.com/jdx/aube/discussions/1298
+  Upstream fix: https://github.com/jdx/aube/pull/1299
+
+- [`metro-gvs-package-resolve`](metro-gvs-package-resolve) (observed with aube
+  `1.40.0`, fixed in aube `1.41.0`, retested on `1.41.0`): isolated installs
+  with the default-on global virtual store
+  make `node_modules/<pkg>` a symlink whose realpath is
+  `$XDG_CACHE_HOME/aube/virtual-store/...`. Node resolves that package.
+  Metro 0.84.4 does not: `Metro.buildGraph` reports
+  `Unable to resolve module is-number` and, if `extraNodeModules` points
+  at the realpath, lists that GVS path as an extra search directory and
+  still fails. Adding the GVS package realpath to Metro `watchFolders`
+  fixes it. `aube install --disable-global-virtual-store` and
+  `node-linker=hoisted` keep the realpath inside the project and Metro
+  succeeds. Native pnpm `11.21.0` isolated also succeeds because
+  `.pnpm/` stays in the project; pnpm with
+  `enableGlobalVirtualStore=true` fails the same way. First seen as
+  Metro `Unable to resolve "expo/virtual/env"` in an Expo 56 app after
+  Babel injected that import. aubeshim's hoisted linker injection is not
+  required to reproduce this. Before aube `1.41.0`, `metro`, `expo`, and
+  `react-native` were not on the default
+  `disableGlobalVirtualStoreForPackages` list.
+  Docs: https://aube.jdx.dev/package-manager/global-virtual-store,
+  https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/troubleshooting,
+  https://metrobundler.dev/docs/configuration/#watchfolders
+  Related: [#32 next-gvs-auto-disable](https://github.com/jdx/aube/pull/32) /
+  [#101 gvs-auto-disable-list](https://github.com/jdx/aube/pull/101) added the
+  GVS auto-disable list;
+  [#117 trim-gvs-auto-disable-list](https://github.com/jdx/aube/pull/117)
+  dropped names that lacked a concrete repro;
+  [#754 config-symlink-resolution](https://github.com/jdx/aube/discussions/754)
+  is isolated config-loader resolution, not Metro's file map.
+  Aube `1.41.0` adds `metro`, `expo`, and `react-native` to the default
+  `disableGlobalVirtualStoreForPackages` list. A default isolated install
+  now warns, materializes packages inside the project, and passes the Metro
+  graph build. Explicit `--enable-global-virtual-store` still overrides the
+  compatibility detection and reproduces the upstream Metro limitation by
+  design.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1294
+  Upstream fix: https://github.com/jdx/aube/pull/1297
+
+- [`hoisted-react-peer-duplication`](hoisted-react-peer-duplication)
+  (observed with aube `1.40.0`, fixed in aube `1.41.0`, retested on
+  `1.41.0`): in a two-importer workspace, the
+  alphabetically earlier package pins `react@19.2.3` and the later one pins
+  `react@19.2.6` plus `zustand@5.0.11` (`peer react: ">=18.0.0"`, optional).
+  Isolated aube shares one `react@19.2.6` realpath between web and zustand.
+  `aube install --node-linker=hoisted` used to let mobile claim the
+  workspace-root `react` slot with `19.2.3`, then materialize `19.2.6` twice
+  (`packages/web/node_modules/react` and
+  `node_modules/zustand/node_modules/react`). Node loads two module
+  identities of the same version. Native pnpm `11.21.0` and `10.24.0`
+  hoisted place `19.2.6` once at the workspace root and nest only
+  `19.2.3` under mobile. Aube `1.41.0` now ranks conflicting hoisted versions
+  across the workspace and places the more widely used `19.2.6` at the root,
+  so web and zustand share one React identity. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (same version across importers, fixed in aube `1.38.1`) and from
+  [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
+  (warm-path slot check).
+  Docs: https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces
+  Related:
+  [#1242 hoisted-shared-realpath](https://github.com/jdx/aube/discussions/1242) /
+  [#1243 workspace-hoisted-planner](https://github.com/jdx/aube/pull/1243)
+  shared one physical
+  package for compatible hoisted deps; this leftover is the
+  conflict-nest path for the same version.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1293
+  Upstream fix: https://github.com/jdx/aube/pull/1296
+
+- [`hoisted-workspace-auto-install-freshness`](hoisted-workspace-auto-install-freshness)
+  (observed with aube `1.40.0`, fixed in aube `1.41.0`, retested on
+  `1.41.0`): after a valid hoisted workspace install, a
+  member-only direct dependency lives at the workspace-root
+  `node_modules/<dep>` and the package-local
+  `packages/<pkg>/node_modules/<dep>` slot is intentionally absent. Node
+  resolves the dependency through the root placement. `aube run` and
+  `aube exec` used to report `installed entry missing` for that absent slot
+  and reinstall on every invocation. Aube `1.41.0` records the actual
+  ancestor-visible placement, so repeated commands remain warm.
+  `AUBE_NO_AUTO_INSTALL=1` and
+  `--no-install` skip the check. Direct `aube run ok` reproduces without
+  aubeshim when the workspace or env keeps `node-linker=hoisted`; without
+  that, the first auto-install rewrites the tree to isolated and the
+  second run stays warm. Distinct from
+  [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
+  (shared package-root identity, fixed in aube `1.38.1`). Native pnpm
+  `11.21.0` uses the same root-only hoisted placement.
+  Docs: https://aube.jdx.dev/package-manager/install,
+  https://aube.jdx.dev/package-manager/node-modules,
+  https://aube.jdx.dev/package-manager/workspaces,
+  https://aube.jdx.dev/settings/#setting-aubenoautoinstall
+  Related:
+  [#1242 hoisted-shared-realpath](https://github.com/jdx/aube/discussions/1242) /
+  [#1243 workspace-hoisted-planner](https://github.com/jdx/aube/pull/1243)
+  made the package-local slot intentionally absent;
+  [#188 install-entry-freshness](https://github.com/jdx/aube/pull/188) added
+  the warm-path
+  `direct_entries` existence check.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1292
+  Upstream fix: https://github.com/jdx/aube/pull/1295
+
+- [`npm-lock-add-reresolve`](npm-lock-add-reresolve) (observed with aube
+  `1.38.1`, fixed in aube `1.41.0`, retested on `1.41.0`): `aube install`
+  treats a fresh npm `package-lock.json` as up to date, but `aube add` of a
+  named spec used to re-resolve unrelated hoisted
+  versions. The fixture pins `jest-config@29.7.0` exactly. The lockfile was
+  produced by npm `11.17.0` with `npm install --ignore-scripts
+  --package-lock-only --no-audit --no-fund`; npm `12.0.2` left that lock
+  byte-identical. npm hoists `camelcase@5.3.1` and nests `camelcase@6.3.0`
+  under `jest-validate`. Real `npm install is-number@7.0.0` only promotes
+  that already-transitive package. `aube add is-number@7.0.0` hoists
+  `camelcase` to `6.3.0`. The same rewrite happens for
+  `aube add jest-config@29.7.0` (already the exact pin) and
+  `aube install --fix-lockfile`, with either isolated or hoisted
+  `AUBE_NODE_LINKER`. Aube `1.41.0` preserves reachable top-level npm
+  placements when rewriting the lockfile, so the unrelated camelcase choice
+  stays unchanged. Smaller trees (`express`, `esbuild`, a two-package
+  `camelcase` pair) did not reproduce the hoist.
+  Docs: https://aube.jdx.dev/package-manager/install,
+  https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/package-manager/dependencies
+  Related:
+  [#1155 lock-diff-scope](https://github.com/jdx/aube/discussions/1155)
+  expected an `add` lock diff to contain only the new package;
+  [#938 optional-native-recording](https://github.com/jdx/aube/discussions/938)
+  is optional-native
+  recording, not unrelated version hoists;
+  [`npm-lock-missing-entry`](npm-lock-missing-entry) is a different
+  `--fix-lockfile` missing-path case.
+  Upstream discussion: https://github.com/jdx/aube/discussions/1286
+  Upstream fix: https://github.com/jdx/aube/pull/1287
 
 - [`hoisted-workspace-shared-dep-realpath`](hoisted-workspace-shared-dep-realpath)
   (observed with aube `1.37.0`, fixed in aube `1.38.1`, retested on `1.38.1`):

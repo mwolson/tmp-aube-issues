@@ -122,17 +122,21 @@ is_number_real() {
 }
 
 echo
-echo "=== aube isolated + global virtual store ==="
+echo "=== explicit GVS override (known-incompatible control) ==="
 clean_modules
 aube install --node-linker=isolated --enable-global-virtual-store --ignore-scripts --no-frozen-lockfile --reporter append-only
-print_layout "isolated + GVS layout"
+print_layout "isolated + explicit GVS"
 if ! node -e 'require.resolve("is-number"); require.resolve("is-number/package.json")'; then
     echo "setup failed: Node could not resolve is-number after the GVS install" >&2
     exit 2
 fi
 gvs_real="$(is_number_real)"
 if [[ "$gvs_real" == "$project_dir"* ]]; then
-    echo "setup failed: GVS install kept is-number inside the project ($gvs_real)" >&2
+    echo "setup failed: explicit GVS install kept is-number inside the project ($gvs_real)" >&2
+    exit 2
+fi
+if run_metro explicit-gvs.out; then
+    echo "setup failed: Metro unexpectedly resolved through the explicitly enabled GVS" >&2
     exit 2
 fi
 
@@ -183,17 +187,24 @@ if [[ -n "$PNPM_BIN" ]]; then
 fi
 
 echo
-echo "=== aube isolated + GVS (case under test) ==="
+echo "=== default aube install (case under test) ==="
 clean_modules
-aube install --node-linker=isolated --enable-global-virtual-store --ignore-scripts --reporter append-only
-print_layout "isolated + GVS (retest)"
-if run_metro gvs-case.out; then
-    echo
-    echo "pass: Metro resolved is-number through aube's global virtual store"
-    exit 0
+aube install --node-linker=isolated --ignore-scripts --reporter append-only 2>&1 | tee default-install.out
+print_layout "default isolated layout"
+if ! grep -q "WARN_AUBE_GVS_INCOMPATIBLE" default-install.out; then
+    echo "failed: aube did not report that it disabled GVS for the Metro project" >&2
+    exit 1
+fi
+default_real="$(is_number_real)"
+if [[ "$default_real" != "$project_dir"* ]]; then
+    echo "failed: default Metro install kept is-number outside the project ($default_real)" >&2
+    exit 1
+fi
+if ! run_metro default-case.out; then
+    echo "failed: Metro could not resolve after aube's default compatibility detection" >&2
+    exit 1
 fi
 
 echo
-echo "failed: Metro cannot resolve a package whose realpath is in aube's global virtual store" >&2
-echo "expected: Metro.buildGraph resolves is-number the same way Node does" >&2
-exit 1
+echo "pass: aube disabled GVS for the Metro project and Metro resolved is-number"
+exit 0
