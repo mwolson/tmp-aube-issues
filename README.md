@@ -22,6 +22,7 @@ existing npm and Bun projects.
   https://pnpm.io/catalogs
   Related: https://github.com/jdx/aube/discussions/174 /
   https://github.com/jdx/aube/pull/249 (read path only)
+  Upstream discussion: https://github.com/jdx/aube/discussions/1343
 
 ## Intentional
 
