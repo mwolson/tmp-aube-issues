@@ -5,7 +5,23 @@ existing npm and Bun projects.
 
 ## Open
 
-None.
+- [`pnpm-catalog-override-lock-write`](pnpm-catalog-override-lock-write)
+  (observed with aube `1.41.0`): pnpm 11 stores catalog-resolved override
+  values in `pnpm-lock.yaml` (`overrides: { is-number: 7.0.0 }` and importer
+  `specifier: 7.0.0`) even when `pnpm-workspace.yaml` and `package.json` say
+  `catalog:`. Aube already accepts that pnpm-written shape on frozen install
+  (discussion #174 / PR #249). When aube *writes* the lockfile (`add` or a
+  non-frozen install after a manifest change) it stores the raw `catalog:`
+  string in both fields. Official pnpm then fails frozen CI with
+  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, and after restoring only the overrides
+  map it still fails with `ERR_PNPM_OUTDATED_LOCKFILE`
+  (`lockfile: catalog:, manifest: 7.0.0`). Aube frozen-installs its own rewrite.
+  First seen adding `@opencode-ai/client` in pingdotgg/t3code #5251.
+  Docs: https://aube.jdx.dev/package-manager/lockfiles,
+  https://aube.jdx.dev/package-manager/workspaces,
+  https://pnpm.io/catalogs
+  Related: https://github.com/jdx/aube/discussions/174 /
+  https://github.com/jdx/aube/pull/249 (read path only)
 
 ## Intentional
 
