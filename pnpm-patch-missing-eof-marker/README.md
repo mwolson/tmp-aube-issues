@@ -59,9 +59,9 @@ omitted four EOF context annotations. Adding those four annotations let aube
 package files then matched the output of pnpm applying the original patch.
 That registry-package check is separate from this reduced local-tarball case.
 
+Upstream discussion: [#1514 missing-eof-marker](https://github.com/aubepkg/aube/discussions/1514).
 The earlier [CRLF patch fix](https://github.com/aubepkg/aube/pull/384) addresses
-line-ending normalization. No matching EOF report was found in the upstream
-discussion search on 2026-09-09.
+line-ending normalization.
 
 Relevant docs: [Node modules and pnpm coexistence](https://aube.en.dev/package-manager/node-modules.html),
 [lockfiles](https://aube.en.dev/package-manager/lockfiles.html).

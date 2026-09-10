@@ -12,7 +12,7 @@ existing npm and Bun projects.
   Adding the annotation makes both managers succeed. Reduced to a two-line
   local package with no registry dependencies. The requested compatibility is
   pnpm's tolerance for the missing annotation.
-  Upstream report not yet filed.
+  Upstream discussion: [#1514 missing-eof-marker](https://github.com/aubepkg/aube/discussions/1514).
 
 ## Intentional
 
