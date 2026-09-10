@@ -1,4 +1,5 @@
 node_modules/
+tmp/
 .repro-work/
 pnpm-patch-plain-unified-diff/pnpm-lock.yaml
 pnpm-patch-plain-unified-diff/aube-lock.yaml

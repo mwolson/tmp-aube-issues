@@ -5,7 +5,14 @@ existing npm and Bun projects.
 
 ## Open
 
-None.
+- [`pnpm-patch-missing-eof-marker`](pnpm-patch-missing-eof-marker) (observed
+  with aube `2.2.13`): a patch whose final context line lacks the canonical
+  `\ No newline at end of file` annotation fails against an unterminated file.
+  Native pnpm `11.10.0` and `12.3.4` apply it and preserve the absent newline.
+  Adding the annotation makes both managers succeed. Reduced to a two-line
+  local package with no registry dependencies. The requested compatibility is
+  pnpm's tolerance for the missing annotation.
+  Upstream report not yet filed.
 
 ## Intentional
 
