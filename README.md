@@ -5,14 +5,7 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`pnpm-patch-missing-eof-marker`](pnpm-patch-missing-eof-marker) (observed
-  with aube `2.2.13`): a patch whose final context line lacks the canonical
-  `\ No newline at end of file` annotation fails against an unterminated file.
-  Native pnpm `11.10.0` and `12.3.4` apply it and preserve the absent newline.
-  Adding the annotation makes both managers succeed. Reduced to a two-line
-  local package with no registry dependencies. The requested compatibility is
-  pnpm's tolerance for the missing annotation.
-  Upstream discussion: [#1514 missing-eof-marker](https://github.com/aubepkg/aube/discussions/1514).
+None.
 
 ## Intentional
 
@@ -47,6 +40,22 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`pnpm-patch-missing-eof-marker`](pnpm-patch-missing-eof-marker)
+  (observed with aube `2.2.13`, fixed in aube `2.2.14`, retested on
+  `2.2.16`): a patch whose final context line lacks the canonical
+  `\ No newline at end of file` annotation used to fail against an
+  unterminated file with `error applying hunk #1`. Native pnpm `11.10.0`
+  and `12.3.4` apply it and preserve the absent newline. Aube `2.2.14`
+  retries with an EOF annotation on matching final context, so both the
+  canonical and missing-marker variants now pass, including exact
+  output-byte assertions. Reduced to a two-line local package with no
+  registry dependencies. First seen applying
+  `react-native-keyboard-controller@1.21.13` in pingdotgg/t3code.
+  Upstream discussion:
+  [#1514 missing-eof-marker](https://github.com/aubepkg/aube/discussions/1514)
+  Upstream fix:
+  [#1515 missing-eof-marker](https://github.com/aubepkg/aube/pull/1515)
 
 - [`pnpm-catalog-override-lock-write`](pnpm-catalog-override-lock-write)
   (observed with aube `1.41.0`, fixed in aube `2.0.1`, retested on

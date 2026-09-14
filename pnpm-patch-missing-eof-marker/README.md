@@ -1,16 +1,17 @@
-# Patch without an EOF marker fails under aube but applies under pnpm
+# Patch without an EOF marker used to fail under aube
 
-Observed with aube 2.2.13 on Linux x64. Native pnpm 11.10.0 and 12.3.4 apply
-both variants below.
+Observed with aube 2.2.13 on Linux x64. Fixed in aube 2.2.14
+([#1515 missing-eof-marker](https://github.com/aubepkg/aube/pull/1515));
+retested on 2.2.16. Native pnpm 11.10.0 and 12.3.4 apply both variants below.
 
 The target file has two lines and no trailing newline. `change.patch` changes
 its first line, with the unterminated second line retained as context. The
 patch omits the canonical `\ No newline at end of file` annotation after that
 context line.
 
-Adding the missing annotation makes both package managers apply the patch and
-preserve the absent trailing newline. The requested compatibility is pnpm's
-tolerance for that missing annotation.
+Adding the missing annotation made aube 2.2.13 apply the patch and preserve
+the absent trailing newline. Aube 2.2.14 now matches pnpm's tolerance for the
+missing annotation without that extra marker.
 
 ## Run
 
@@ -42,10 +43,10 @@ preserve the exact expected file bytes, including the absent trailing newline.
 
 ## Results
 
-| Patch | pnpm 11.10.0 | pnpm 12.3.4 | aube 2.2.13 |
-| --- | --- | --- | --- |
-| Canonical EOF marker | Pass | Pass | Pass |
-| Missing EOF marker | Pass | Pass | Fails applying hunk 1 |
+| Patch | pnpm 11.10.0 | pnpm 12.3.4 | aube 2.2.13 | aube 2.2.16 |
+| --- | --- | --- | --- | --- |
+| Canonical EOF marker | Pass | Pass | Pass | Pass |
+| Missing EOF marker | Pass | Pass | Fails applying hunk 1 | Pass |
 
 ```text
 failed to apply patch for patch-target@1.0.0:
