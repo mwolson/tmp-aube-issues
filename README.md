@@ -15,7 +15,12 @@ existing npm and Bun projects.
   All three paths reproduce with the global virtual store enabled and
   disabled. A follow-up install and `install --force` leave the shim in
   this fixture. `aube prune` also leaves it; `aube ci` removes it and restores
-  PATH fallback.
+  PATH fallback. The #1673 prune-stale-bin-shims build (head `ae8407d`, `2.6.1-DEBUG`) passes
+  all six cases, and it also removes the shim before cache expiry.
+  Upstream discussion:
+  [#1672 stale-bin-shim](https://github.com/aubepkg/aube/discussions/1672)
+  Pending fix:
+  [#1673 prune-stale-bin-shims](https://github.com/aubepkg/aube/pull/1673)
 
 ## Intentional
 
