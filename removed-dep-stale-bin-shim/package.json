@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "check": "semver 1.2.3"
+  },
+  "devDependencies": {
+    "semver": "7.7.2"
+  }
+}

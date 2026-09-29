@@ -5,7 +5,17 @@ existing npm and Bun projects.
 
 ## Open
 
-None.
+- [`removed-dep-stale-bin-shim`](removed-dep-stale-bin-shim) (observed with
+  `aube 2.6.0 linux-x64 (2026-09-28)`): removing `semver` leaves its `.bin`
+  shim behind through `aube remove`, a manifest edit followed by install,
+  or an updated manifest and lockfile copied over an existing install.
+  Once the documented seven-day orphan-cache retention expires, install
+  removes the virtual-store entry but keeps the shim. `aube run` then fails
+  with `MODULE_NOT_FOUND` instead of using the replacement command on PATH.
+  All three paths reproduce with the global virtual store enabled and
+  disabled. A follow-up install and `install --force` leave the shim in
+  this fixture. `aube prune` also leaves it; `aube ci` removes it and restores
+  PATH fallback.
 
 ## Intentional
 
@@ -290,7 +300,7 @@ migration notes; the repro still exits non-zero while the difference holds.
   from config inspection for settings that do not declare that source, so
   `config get` now returns `undefined` for a user `.npmrc` allowlist.
   Follow-up to the write half raised in
-  [#617](https://github.com/jdx/aube/discussions/617).
+  [#617 global-allow-build](https://github.com/jdx/aube/discussions/617).
   Upstream discussion: https://github.com/jdx/aube/discussions/1158
   Upstream fix: https://github.com/jdx/aube/pull/1159
 
@@ -303,8 +313,10 @@ migration notes; the repro still exits non-zero while the difference holds.
   fetch/link still honor `supportedArchitectures`. The repro passes
   `--allow-low-downloads` so aube's post-1.35 similar-name gate on `is-odd`
   does not block the add under test.
-  Related to [#938](https://github.com/jdx/aube/discussions/938) /
-  [#942](https://github.com/jdx/aube/pull/942) for the npm lockfile path.
+  Related to
+  [#938 optional-native-recording](https://github.com/jdx/aube/discussions/938) /
+  [#942 npm-lock-cross-platform-optionals](https://github.com/jdx/aube/pull/942)
+  for the npm lockfile path.
   Upstream discussion: https://github.com/jdx/aube/discussions/1155
   Upstream fix: https://github.com/jdx/aube/pull/1156
 
