@@ -14,6 +14,8 @@ existing npm and Bun projects.
   which emits the heading with an extra blank line that re-parses as context.
   Native pnpm 12.8.1 applies it. Found with
   `react-native-keyboard-controller@1.21.13` in pingdotgg/t3code.
+  Upstream discussion:
+  [#1676 heading-eof-marker](https://github.com/aubepkg/aube/discussions/1676)
 
 - [`removed-dep-stale-bin-shim`](removed-dep-stale-bin-shim) (observed with
   `aube 2.6.0 linux-x64 (2026-09-28)`): removing `semver` leaves its `.bin`

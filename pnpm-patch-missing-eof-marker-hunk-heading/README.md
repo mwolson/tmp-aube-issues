@@ -65,3 +65,6 @@ Found installing `react-native-keyboard-controller@1.21.13` with the
 pingdotgg/t3code patch, which has 53 headed hunks. Stripping the headings made
 aube 2.6.1 install it and produce the patched file with the unterminated last
 line preserved.
+
+Upstream discussion:
+[#1676 heading-eof-marker](https://github.com/aubepkg/aube/discussions/1676)
