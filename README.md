@@ -5,6 +5,14 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`file-dep-workspace-peer-link`](file-dep-workspace-peer-link) (observed
+  with `aube 2.6.1 linux-x64 (2026-09-29)`): a `file:` directory dependency
+  that peers on a workspace package cannot resolve it. From a pnpm-written
+  lockfile, aube links the peer to a `@x+shared@link+packages+shared`
+  virtual-store entry it never creates; from its own lockfile it writes no
+  peer link. Native pnpm 12.8.1 links the workspace package. Found with
+  `@t3tools/mobile-markdown-text` in pingdotgg/t3code.
+
 - [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
   (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
   2.6.0): the missing EOF marker fix from

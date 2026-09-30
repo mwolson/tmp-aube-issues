@@ -1,0 +1,1 @@
+{"name":"app","private":true,"dependencies":{"@x/shared":"workspace:*","@x/md":"file:./modules/md"}}
