@@ -52,3 +52,6 @@ Found with `@t3tools/mobile-markdown-text` in pingdotgg/t3code, a
 `file:./modules/t3-markdown-text` package in the Expo app that peers on the
 workspace packages `@t3tools/shared` and `@t3tools/client-runtime`. The mobile
 typecheck cannot resolve its workspace imports under aube.
+
+Upstream discussion:
+[#1677 file-dep-workspace-peer](https://github.com/aubepkg/aube/discussions/1677)

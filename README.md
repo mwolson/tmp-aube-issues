@@ -12,6 +12,8 @@ existing npm and Bun projects.
   virtual-store entry it never creates; from its own lockfile it writes no
   peer link. Native pnpm 12.8.1 links the workspace package. Found with
   `@t3tools/mobile-markdown-text` in pingdotgg/t3code.
+  Upstream discussion:
+  [#1677 file-dep-workspace-peer](https://github.com/aubepkg/aube/discussions/1677)
 
 - [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
   (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
