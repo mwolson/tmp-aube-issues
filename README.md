@@ -5,6 +5,16 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
+  (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
+  2.6.0): the missing EOF marker fix from
+  [#1515 missing-eof-marker](https://github.com/aubepkg/aube/pull/1515) still
+  fails with `error applying hunk #1` when git wrote a section heading after
+  the hunk's second `@@`. The retry re-renders the patch with diffy 0.5.2,
+  which emits the heading with an extra blank line that re-parses as context.
+  Native pnpm 12.8.1 applies it. Found with
+  `react-native-keyboard-controller@1.21.13` in pingdotgg/t3code.
+
 - [`removed-dep-stale-bin-shim`](removed-dep-stale-bin-shim) (observed with
   `aube 2.6.0 linux-x64 (2026-09-28)`): removing `semver` leaves its `.bin`
   shim behind through `aube remove`, a manifest edit followed by install,

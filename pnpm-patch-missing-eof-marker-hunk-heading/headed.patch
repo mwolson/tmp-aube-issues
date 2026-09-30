@@ -1,0 +1,9 @@
+diff --git a/index.js b/index.js
+--- a/index.js
++++ b/index.js
+@@ -2,4 +2,4 @@ module.exports = 1;
+ // a
+-// b
++// B
+ // c
+ // end
