@@ -15,6 +15,21 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1677 file-dep-workspace-peer](https://github.com/aubepkg/aube/discussions/1677)
 
+- [`pnpm-patch-peer-suffix-drop`](pnpm-patch-peer-suffix-drop) (observed with
+  `aube 2.6.1 linux-x64 (2026-09-29)`): after unrelated manifest drift, a
+  non-frozen aube install rewrites the pnpm lockfile's peer-suffixed snapshot
+  keys without the patched peer's hash. pnpm 11.10.0 writes
+  `react-dom@19.1.0(react@19.1.0(patch_hash=...))`; aube writes
+  `react-dom@19.1.0(react@19.1.0)`, which names no snapshot in the lockfile.
+  The installed copy stays patched and pnpm accepts the result, but never
+  restores the hashes, so one aube install permanently rewrites every such key
+  (about 1,600 lockfile lines and 93 `effect` peer suffixes in pingdotgg/t3code).
+  The `pnpm-patch-reresolve-drop` fix kept the patched packages' own identities
+  but not peer references to them.
+  Upstream discussion:
+  [#1029 non-frozen-reresolve-patch-metadata](https://github.com/aubepkg/aube/discussions/1029)
+  (follow-up comment, not yet posted)
+
 - [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
   (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
   2.6.0): the missing EOF marker fix from

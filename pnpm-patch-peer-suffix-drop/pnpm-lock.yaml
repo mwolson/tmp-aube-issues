@@ -1,0 +1,44 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+patchedDependencies:
+  react@19.1.0: 4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7
+
+importers:
+
+  .:
+    dependencies:
+      react:
+        specifier: 19.1.0
+        version: 19.1.0(patch_hash=4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7)
+      react-dom:
+        specifier: 19.1.0
+        version: 19.1.0(react@19.1.0(patch_hash=4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7))
+
+packages:
+
+  react-dom@19.1.0:
+    resolution: {integrity: sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==}
+    peerDependencies:
+      react: ^19.1.0
+
+  react@19.1.0:
+    resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
+    engines: {node: '>=0.10.0'}
+
+  scheduler@0.26.0:
+    resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
+
+snapshots:
+
+  react-dom@19.1.0(react@19.1.0(patch_hash=4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7)):
+    dependencies:
+      react: 19.1.0(patch_hash=4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7)
+      scheduler: 0.26.0
+
+  react@19.1.0(patch_hash=4d0f60e027b4ddce6be8f2532c584a6d364b805cf3c54d80132dc27dadef6fa7): {}
+
+  scheduler@0.26.0: {}

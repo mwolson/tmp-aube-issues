@@ -1,0 +1,4 @@
+packages:
+  - .
+patchedDependencies:
+  react@19.1.0: patches/react@19.1.0.patch

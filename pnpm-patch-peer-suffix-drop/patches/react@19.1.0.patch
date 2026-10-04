@@ -1,0 +1,10 @@
+diff --git a/index.js b/index.js
+index d830d7a2f9f7f0649af7f5b6727206b2bbd4f93b..a60a09b94a0d16373934c7b0d18c8be55292a90a 100644
+--- a/index.js
++++ b/index.js
+@@ -5,3 +5,5 @@ if (process.env.NODE_ENV === 'production') {
+ } else {
+   module.exports = require('./cjs/react.development.js');
+ }
++
++module.exports.patched = "v1";

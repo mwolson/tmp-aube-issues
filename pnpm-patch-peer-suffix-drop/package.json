@@ -1,0 +1,9 @@
+{
+  "name": "pnpm-patch-peer-suffix-drop",
+  "private": true,
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "is-positive": "3.1.0"
+  }
+}
