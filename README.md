@@ -28,7 +28,7 @@ existing npm and Bun projects.
   but not peer references to them.
   Upstream discussion:
   [#1029 non-frozen-reresolve-patch-metadata](https://github.com/aubepkg/aube/discussions/1029)
-  (follow-up comment, not yet posted)
+  ([follow-up comment](https://github.com/aubepkg/aube/discussions/1029#discussioncomment-18743723))
 
 - [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
   (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
