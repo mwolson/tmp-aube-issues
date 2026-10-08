@@ -5,59 +5,7 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`file-dep-workspace-peer-link`](file-dep-workspace-peer-link) (observed
-  with `aube 2.6.1 linux-x64 (2026-09-29)`): a `file:` directory dependency
-  that peers on a workspace package cannot resolve it. From a pnpm-written
-  lockfile, aube links the peer to a `@x+shared@link+packages+shared`
-  virtual-store entry it never creates; from its own lockfile it writes no
-  peer link. Native pnpm 12.8.1 links the workspace package. Found with
-  `@t3tools/mobile-markdown-text` in pingdotgg/t3code.
-  Upstream discussion:
-  [#1677 file-dep-workspace-peer](https://github.com/aubepkg/aube/discussions/1677)
-
-- [`pnpm-patch-peer-suffix-drop`](pnpm-patch-peer-suffix-drop) (observed with
-  `aube 2.6.1 linux-x64 (2026-09-29)`): after unrelated manifest drift, a
-  non-frozen aube install rewrites the pnpm lockfile's peer-suffixed snapshot
-  keys without the patched peer's hash. pnpm 11.10.0 writes
-  `react-dom@19.1.0(react@19.1.0(patch_hash=...))`; aube writes
-  `react-dom@19.1.0(react@19.1.0)`, which names no snapshot in the lockfile.
-  The installed copy stays patched and pnpm accepts the result, but never
-  restores the hashes, so one aube install permanently rewrites every such key
-  (about 1,600 lockfile lines and 93 `effect` peer suffixes in pingdotgg/t3code).
-  The `pnpm-patch-reresolve-drop` fix kept the patched packages' own identities
-  but not peer references to them.
-  Upstream discussion:
-  [#1029 non-frozen-reresolve-patch-metadata](https://github.com/aubepkg/aube/discussions/1029)
-  ([follow-up comment](https://github.com/aubepkg/aube/discussions/1029#discussioncomment-18743723))
-
-- [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
-  (observed with `aube 2.6.1 linux-x64 (2026-09-29)`, also 2.2.17 through
-  2.6.0): the missing EOF marker fix from
-  [#1515 missing-eof-marker](https://github.com/aubepkg/aube/pull/1515) still
-  fails with `error applying hunk #1` when git wrote a section heading after
-  the hunk's second `@@`. The retry re-renders the patch with diffy 0.5.2,
-  which emits the heading with an extra blank line that re-parses as context.
-  Native pnpm 12.8.1 applies it. Found with
-  `react-native-keyboard-controller@1.21.13` in pingdotgg/t3code.
-  Upstream discussion:
-  [#1676 heading-eof-marker](https://github.com/aubepkg/aube/discussions/1676)
-
-- [`removed-dep-stale-bin-shim`](removed-dep-stale-bin-shim) (observed with
-  `aube 2.6.0 linux-x64 (2026-09-28)`): removing `semver` leaves its `.bin`
-  shim behind through `aube remove`, a manifest edit followed by install,
-  or an updated manifest and lockfile copied over an existing install.
-  Once the documented seven-day orphan-cache retention expires, install
-  removes the virtual-store entry but keeps the shim. `aube run` then fails
-  with `MODULE_NOT_FOUND` instead of using the replacement command on PATH.
-  All three paths reproduce with the global virtual store enabled and
-  disabled. A follow-up install and `install --force` leave the shim in
-  this fixture. `aube prune` also leaves it; `aube ci` removes it and restores
-  PATH fallback. The #1673 prune-stale-bin-shims build (head `ae8407d`, `2.6.1-DEBUG`) passes
-  all six cases, and it also removes the shim before cache expiry.
-  Upstream discussion:
-  [#1672 stale-bin-shim](https://github.com/aubepkg/aube/discussions/1672)
-  Pending fix:
-  [#1673 prune-stale-bin-shims](https://github.com/aubepkg/aube/pull/1673)
+None currently.
 
 ## Intentional
 
@@ -92,6 +40,75 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`file-dep-workspace-peer-link`](file-dep-workspace-peer-link) (observed
+  with aube `2.6.1`, fixed in aube `2.7.0`, retested on `2.7.0`): a `file:`
+  directory dependency that peers on a workspace package could not resolve
+  it. From a pnpm-written lockfile, aube linked the peer to a
+  `@x+shared@link+packages+shared` virtual-store entry it never created;
+  from its own lockfile it wrote no peer link. Native pnpm 12.8.1 links the
+  workspace package. Aube `2.7.0` reads a `file:` package's
+  `peerDependencies` and resolves pnpm's `link:` snapshot edge to the
+  workspace package, so the pnpm control, the frozen install from pnpm's
+  lockfile, and the fresh aube install all pass. A required peer that nothing
+  in scope provides is still not auto-installed. Found with
+  `@t3tools/mobile-markdown-text` in pingdotgg/t3code, whose mobile typecheck
+  now passes under a plain aube install.
+  Upstream discussion:
+  [#1677 file-dep-workspace-peer](https://github.com/aubepkg/aube/discussions/1677)
+  Upstream fix:
+  [#1679 file-dep-workspace-peer](https://github.com/aubepkg/aube/pull/1679)
+
+- [`pnpm-patch-peer-suffix-drop`](pnpm-patch-peer-suffix-drop) (observed with
+  aube `2.6.1`, fixed in aube `2.7.0`, retested on `2.7.0`): after unrelated
+  manifest drift, a non-frozen aube install used to rewrite the pnpm
+  lockfile's peer-suffixed snapshot keys without the patched peer's hash.
+  pnpm 11.10.0 writes `react-dom@19.1.0(react@19.1.0(patch_hash=...))`;
+  aube wrote `react-dom@19.1.0(react@19.1.0)`, which names no snapshot in the
+  lockfile, and pnpm never restored the hashes. In pingdotgg/t3code one aube
+  install rewrote about 1,600 lockfile lines, including 93 `effect` peer
+  suffixes. The `pnpm-patch-reresolve-drop` fix had kept the patched
+  packages' own identities but not peer references to them. Aube `2.7.0`
+  preserves patched peer identities in importer versions, snapshot keys, and
+  dependency references; the t3code lockfile keeps every hashed `effect` peer
+  suffix after a non-frozen install.
+  Upstream discussion:
+  [#1029 non-frozen-reresolve-patch-metadata](https://github.com/aubepkg/aube/discussions/1029)
+  ([follow-up comment](https://github.com/aubepkg/aube/discussions/1029#discussioncomment-18743723))
+  Upstream fix:
+  [#1685 patched-peer-hashes](https://github.com/aubepkg/aube/pull/1685)
+
+- [`pnpm-patch-missing-eof-marker-hunk-heading`](pnpm-patch-missing-eof-marker-hunk-heading)
+  (observed with aube `2.2.17` through `2.6.1`, fixed in aube `2.7.0`,
+  retested on `2.7.0`): the missing EOF marker fix from
+  [#1515 missing-eof-marker](https://github.com/aubepkg/aube/pull/1515) still
+  failed with `error applying hunk #1` when git wrote a section heading after
+  the hunk's second `@@`. The retry re-rendered the patch with diffy 0.5.2,
+  which emitted the heading with an extra blank line that re-parsed as
+  context. Native pnpm 12.8.1 applies it. Aube `2.7.0` writes the `@@`
+  headers itself on retry, so all three variants apply. The original
+  `react-native-keyboard-controller@1.21.13` patch from pingdotgg/t3code (53
+  headed hunks, no EOF markers) also installs.
+  Upstream discussion:
+  [#1676 heading-eof-marker](https://github.com/aubepkg/aube/discussions/1676)
+  Upstream fix:
+  [#1678 heading-eof-marker](https://github.com/aubepkg/aube/pull/1678)
+
+- [`removed-dep-stale-bin-shim`](removed-dep-stale-bin-shim) (observed with
+  aube `2.6.0`, fixed in aube `2.7.0`, retested on `2.7.0`): removing
+  `semver` used to leave its `.bin` shim behind through `aube remove`, a
+  manifest edit followed by install, or an updated manifest and lockfile
+  copied over an existing install. Once the seven-day orphan-cache retention
+  expired, install removed the virtual-store entry but kept the shim, and
+  `aube run` failed with `MODULE_NOT_FOUND` instead of using the replacement
+  command on PATH. Only `aube ci` cleaned it up. Aube `2.7.0` prunes `.bin`
+  commands the current graph no longer claims right after linking, so all
+  six cases (three removal paths, global virtual store on and off) drop the
+  shim and fall back to PATH.
+  Upstream discussion:
+  [#1672 stale-bin-shim](https://github.com/aubepkg/aube/discussions/1672)
+  Upstream fix:
+  [#1673 prune-stale-bin-shims](https://github.com/aubepkg/aube/pull/1673)
 
 - [`pnpm-patch-missing-eof-marker`](pnpm-patch-missing-eof-marker)
   (observed with aube `2.2.13`, fixed in aube `2.2.14`, retested on
