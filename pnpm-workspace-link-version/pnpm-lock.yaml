@@ -1,0 +1,35 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  packages/app:
+    dependencies:
+      '@x/md':
+        specifier: file:../../modules/md
+        version: file:modules/md(@x/shared@packages+shared)
+      '@x/shared':
+        specifier: workspace:*
+        version: link:../shared
+
+  packages/extra: {}
+
+  packages/shared: {}
+
+packages:
+
+  '@x/md@file:modules/md':
+    resolution: {directory: modules/md, type: directory}
+    peerDependencies:
+      '@x/shared': '*'
+
+snapshots:
+
+  '@x/md@file:modules/md(@x/shared@packages+shared)':
+    dependencies:
+      '@x/shared': link:packages/shared

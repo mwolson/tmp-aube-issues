@@ -5,7 +5,17 @@ existing npm and Bun projects.
 
 ## Open
 
-None currently.
+- [`pnpm-workspace-link-version`](pnpm-workspace-link-version) (observed with
+  `aube 2.7.0 linux-x64 (2026-10-07)`, also 2.6.1 and 1.41.0): when aube
+  writes `pnpm-lock.yaml`, it records `workspace:*` dependencies by the
+  workspace package's version (`version: 1.2.3`) instead of pnpm's
+  `link:../shared`, and a `file:` package's workspace peer as `1.2.3` instead
+  of `link:packages/shared`, dropping that package's peer suffix. Aube installs
+  from the result, but pnpm 11.10.0 and 12.8.1 frozen installs fail with
+  `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY`. A non-frozen pnpm 11 install
+  restores the links, but pnpm 12.8.1 fails even with `--fix-lockfile`.
+  Found when one unrelated dependency added in pingdotgg/t3code made aube
+  rewrite about 1,650 lockfile lines.
 
 ## Intentional
 
