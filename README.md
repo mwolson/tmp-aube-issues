@@ -16,6 +16,8 @@ existing npm and Bun projects.
   restores the links, but pnpm 12.8.1 fails even with `--fix-lockfile`.
   Found when one unrelated dependency added in pingdotgg/t3code made aube
   rewrite about 1,650 lockfile lines.
+  Upstream discussion:
+  [#1718 workspace-link-version](https://github.com/aubepkg/aube/discussions/1718)
 
 ## Intentional
 
