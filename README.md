@@ -5,6 +5,28 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`dir-flag-ancestor-package-json`](dir-flag-ancestor-package-json)
+  (observed with `aube 2.7.0 linux-x64 (2026-10-07)`): `aube add <spec> -C
+  <dir>` (also `--dir` and the npm-style `--prefix`) writes the dependency to
+  the nearest ancestor `package.json` when `<dir>` has none, leaving `<dir>`
+  empty. pnpm 12.11.2 `add --dir <dir>` (or `-C <dir>`, before or after the
+  command) creates `<dir>/package.json` and installs there, and npm treats an
+  explicit `--prefix` the same way. Without the flag, both pnpm and aube walk
+  up from the cwd, so only the flag differs. Found through
+  `npm install --prefix <staging-dir> <pkg>@<version>` tool installers under
+  aubeshim, which edited the enclosing project instead of the staging dir.
+
+- [`pack-files-glob`](pack-files-glob) (observed with
+  `aube 2.7.0 linux-x64 (2026-10-07)`): `aube pack` selects different files
+  than npm 11.19.0 for three `files` patterns. `["lib", "!**/__tests__"]`
+  fails with `invalid files glob "!**/__tests__": Pattern syntax error ...
+  recursive wildcards must form a single path component` (any `!**/` pattern
+  does). `["lib", "!lib/__tests__"]` ignores the negation and packs
+  `lib/__tests__/index.test.js`. `["lib/**"]` drops `lib/index.js` and packs
+  only the nested test file. The aube docs say pack applies npm-style file
+  selection. Found packing `react-native-enriched-markdown`, whose `files`
+  list uses `!**/__tests__`, `!**/__fixtures__`, `!**/__mocks__`, and `!**/.*`.
+
 - [`pnpm-workspace-link-version`](pnpm-workspace-link-version) (observed with
   `aube 2.7.0 linux-x64 (2026-10-07)`, also 2.6.1 and 1.41.0): when aube
   writes `pnpm-lock.yaml`, it records `workspace:*` dependencies by the
