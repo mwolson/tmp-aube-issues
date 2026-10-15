@@ -30,6 +30,8 @@ existing npm and Bun projects.
   that filters need a workspace. Found through aubeshim routing
   `bun run --filter <pkg> <script>` to aube, which Bun 1.4.3 also runs in a
   single-package project.
+  Upstream discussion:
+  [#1753 filter-root-project](https://github.com/aubepkg/aube/discussions/1753)
 
 - [`pack-files-glob`](pack-files-glob) (observed with
   `aube 2.7.0 linux-x64 (2026-10-07)`): `aube pack` selects different files
