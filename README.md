@@ -15,6 +15,8 @@ existing npm and Bun projects.
   up from the cwd, so only the flag differs. Found through
   `npm install --prefix <staging-dir> <pkg>@<version>` tool installers under
   aubeshim, which edited the enclosing project instead of the staging dir.
+  Upstream discussion:
+  [#1749 dir-flag-walkup](https://github.com/aubepkg/aube/discussions/1749)
 
 - [`pack-files-glob`](pack-files-glob) (observed with
   `aube 2.7.0 linux-x64 (2026-10-07)`): `aube pack` selects different files
@@ -26,6 +28,8 @@ existing npm and Bun projects.
   only the nested test file. The aube docs say pack applies npm-style file
   selection. Found packing `react-native-enriched-markdown`, whose `files`
   list uses `!**/__tests__`, `!**/__fixtures__`, `!**/__mocks__`, and `!**/.*`.
+  Upstream discussion:
+  [#1750 pack-files-glob](https://github.com/aubepkg/aube/discussions/1750)
 
 - [`pnpm-workspace-link-version`](pnpm-workspace-link-version) (observed with
   `aube 2.7.0 linux-x64 (2026-10-07)`, also 2.6.1 and 1.41.0): when aube
