@@ -18,6 +18,19 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1749 dir-flag-walkup](https://github.com/aubepkg/aube/discussions/1749)
 
+- [`filter-root-project`](filter-root-project) (observed with
+  `aube 2.7.0 linux-x64 (2026-10-07)`): `aube --filter <name>` cannot select
+  the root project by name. In a single-package project with no workspace
+  file, `aube --filter app run hello` fails with `--filter requires a
+  workspace root`, and `exec`, `list`, and `test` fail the same way. Inside a
+  pnpm workspace, `aube --filter root run hello` fails with `did not match any
+  workspace package`, and the message prints the internal `EffectiveFilter`
+  debug struct. pnpm 12.11.2 runs the root project's script in both cases. The
+  workspaces docs list exact package names as a selector form and do not say
+  that filters need a workspace. Found through aubeshim routing
+  `bun run --filter <pkg> <script>` to aube, which Bun 1.4.3 also runs in a
+  single-package project.
+
 - [`pack-files-glob`](pack-files-glob) (observed with
   `aube 2.7.0 linux-x64 (2026-10-07)`): `aube pack` selects different files
   than npm 11.19.0 for three `files` patterns. `["lib", "!**/__tests__"]`

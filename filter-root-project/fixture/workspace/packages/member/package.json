@@ -1,0 +1,7 @@
+{
+  "name": "member",
+  "private": true,
+  "scripts": {
+    "hello": "echo hello from member"
+  }
+}
