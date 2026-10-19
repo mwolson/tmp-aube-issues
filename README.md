@@ -5,60 +5,7 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`dir-flag-ancestor-package-json`](dir-flag-ancestor-package-json)
-  (observed with `aube 2.7.0 linux-x64 (2026-10-07)`): `aube add <spec> -C
-  <dir>` (also `--dir` and the npm-style `--prefix`) writes the dependency to
-  the nearest ancestor `package.json` when `<dir>` has none, leaving `<dir>`
-  empty. pnpm 12.11.2 `add --dir <dir>` (or `-C <dir>`, before or after the
-  command) creates `<dir>/package.json` and installs there, and npm treats an
-  explicit `--prefix` the same way. Without the flag, both pnpm and aube walk
-  up from the cwd, so only the flag differs. Found through
-  `npm install --prefix <staging-dir> <pkg>@<version>` tool installers under
-  aubeshim, which edited the enclosing project instead of the staging dir.
-  Upstream discussion:
-  [#1749 dir-flag-walkup](https://github.com/aubepkg/aube/discussions/1749)
-
-- [`filter-root-project`](filter-root-project) (observed with
-  `aube 2.7.0 linux-x64 (2026-10-07)`): `aube --filter <name>` cannot select
-  the root project by name. In a single-package project with no workspace
-  file, `aube --filter app run hello` fails with `--filter requires a
-  workspace root`, and `exec`, `list`, and `test` fail the same way. Inside a
-  pnpm workspace, `aube --filter root run hello` fails with `did not match any
-  workspace package`, and the message prints the internal `EffectiveFilter`
-  debug struct. pnpm 12.11.2 runs the root project's script in both cases. The
-  workspaces docs list exact package names as a selector form and do not say
-  that filters need a workspace. Found through aubeshim routing
-  `bun run --filter <pkg> <script>` to aube, which Bun 1.4.3 also runs in a
-  single-package project.
-  Upstream discussion:
-  [#1753 filter-root-project](https://github.com/aubepkg/aube/discussions/1753)
-
-- [`pack-files-glob`](pack-files-glob) (observed with
-  `aube 2.7.0 linux-x64 (2026-10-07)`): `aube pack` selects different files
-  than npm 11.19.0 for three `files` patterns. `["lib", "!**/__tests__"]`
-  fails with `invalid files glob "!**/__tests__": Pattern syntax error ...
-  recursive wildcards must form a single path component` (any `!**/` pattern
-  does). `["lib", "!lib/__tests__"]` ignores the negation and packs
-  `lib/__tests__/index.test.js`. `["lib/**"]` drops `lib/index.js` and packs
-  only the nested test file. The aube docs say pack applies npm-style file
-  selection. Found packing `react-native-enriched-markdown`, whose `files`
-  list uses `!**/__tests__`, `!**/__fixtures__`, `!**/__mocks__`, and `!**/.*`.
-  Upstream discussion:
-  [#1750 pack-files-glob](https://github.com/aubepkg/aube/discussions/1750)
-
-- [`pnpm-workspace-link-version`](pnpm-workspace-link-version) (observed with
-  `aube 2.7.0 linux-x64 (2026-10-07)`, also 2.6.1 and 1.41.0): when aube
-  writes `pnpm-lock.yaml`, it records `workspace:*` dependencies by the
-  workspace package's version (`version: 1.2.3`) instead of pnpm's
-  `link:../shared`, and a `file:` package's workspace peer as `1.2.3` instead
-  of `link:packages/shared`, dropping that package's peer suffix. Aube installs
-  from the result, but pnpm 11.10.0 and 12.8.1 frozen installs fail with
-  `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY`. A non-frozen pnpm 11 install
-  restores the links, but pnpm 12.8.1 fails even with `--fix-lockfile`.
-  Found when one unrelated dependency added in pingdotgg/t3code made aube
-  rewrite about 1,650 lockfile lines.
-  Upstream discussion:
-  [#1718 workspace-link-version](https://github.com/aubepkg/aube/discussions/1718)
+None as of `aube 2.8.0 linux-x64 (2026-10-19)`.
 
 ## Intentional
 
@@ -93,6 +40,66 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`dir-flag-ancestor-package-json`](dir-flag-ancestor-package-json)
+  (observed with aube `2.7.0`, fixed in aube `2.7.1`, retested on `2.7.2`
+  and `2.8.0`): `aube add <spec> -C <dir>` (also `--dir` and the npm-style
+  `--prefix`) used to write the dependency to the nearest ancestor
+  `package.json` when `<dir>` had none, leaving `<dir>` empty. pnpm 12.11.2
+  `add --dir <dir>` creates `<dir>/package.json` and installs there, and npm
+  treats an explicit `--prefix` the same way. Aube `2.7.1` treats the flag as
+  the exact project directory for `add`; other commands still walk up from
+  it. Found through `npm install --prefix <staging-dir> <pkg>@<version>` tool
+  installers under aubeshim, which edited the enclosing project instead of
+  the staging dir.
+  Upstream discussion:
+  [#1749 dir-flag-walkup](https://github.com/aubepkg/aube/discussions/1749)
+  Upstream fix:
+  [#1751 add-exact-dir](https://github.com/aubepkg/aube/pull/1751)
+
+- [`filter-root-project`](filter-root-project) (observed with aube `2.7.0`,
+  fixed in aube `2.7.2`, retested on `2.7.2` and `2.8.0`): `aube --filter
+  <name>` could not select the root project by name. In a single-package
+  project it failed with `--filter requires a workspace root`, and in a pnpm
+  workspace `--filter root` failed with `did not match any workspace
+  package`. pnpm 12.11.2 runs the root project's script in both cases. Aube
+  `2.7.2` lets an explicit `--filter <name>` (or `--filter ./`) select the
+  root project; `-r` and `--filter '*'` still exclude it, as in pnpm. Found
+  through aubeshim routing `bun run --filter <pkg> <script>` to aube.
+  Upstream discussion:
+  [#1753 filter-root-project](https://github.com/aubepkg/aube/discussions/1753)
+  Upstream fix:
+  [#1754 root-project-filter](https://github.com/aubepkg/aube/pull/1754)
+
+- [`pack-files-glob`](pack-files-glob) (observed with aube `2.7.0`, fixed in
+  aube `2.7.1`, retested on `2.7.2` and `2.8.0`): `aube pack` used to select
+  different files than npm 11.19.0 for three `files` patterns.
+  `["lib", "!**/__tests__"]` failed with a glob syntax error,
+  `["lib", "!lib/__tests__"]` ignored the negation, and `["lib/**"]` dropped
+  `lib/index.js`. Aube `2.7.1` applies `!` entries as exclusions and matches
+  files under a trailing `dir/**`. The repro sorts aube's file list with
+  `LC_ALL=C` so it compares against npm's codepoint order. Found packing
+  `react-native-enriched-markdown`.
+  Upstream discussion:
+  [#1750 pack-files-glob](https://github.com/aubepkg/aube/discussions/1750)
+  Upstream fix:
+  [#1752 pack-files-negation](https://github.com/aubepkg/aube/pull/1752)
+
+- [`pnpm-workspace-link-version`](pnpm-workspace-link-version) (observed with
+  aube `2.7.0`, also 2.6.1 and 1.41.0, fixed in aube `2.7.1`, retested on
+  `2.7.2` and `2.8.0`): when aube wrote `pnpm-lock.yaml`, it recorded
+  `workspace:*` dependencies by the workspace package's version
+  (`version: 1.2.3`) instead of pnpm's `link:../shared`, and a `file:`
+  package's workspace peer as `1.2.3` instead of `link:packages/shared`, so
+  pnpm frozen installs failed with `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY`.
+  Aube `2.7.1` writes `link:` paths, member-relative in importers and
+  root-relative for snapshot edges; pnpm 11.10.0 and 12.14.0 frozen-install
+  the result. Found when one unrelated dependency added in pingdotgg/t3code
+  made aube rewrite about 1,650 lockfile lines.
+  Upstream discussion:
+  [#1718 workspace-link-version](https://github.com/aubepkg/aube/discussions/1718)
+  Upstream fix:
+  [#1719 workspace-link-lockfile](https://github.com/aubepkg/aube/pull/1719)
 
 - [`file-dep-workspace-peer-link`](file-dep-workspace-peer-link) (observed
   with aube `2.6.1`, fixed in aube `2.7.0`, retested on `2.7.0`): a `file:`

@@ -46,7 +46,7 @@ aube_files() {
         echo "error: $(grep -m1 'files glob' "$dir.log" | sed 's/^[^a-z]*//')"
         return
     fi
-    tar tzf "$dir"/out/*.tgz | sed 's|^package/||' | sort | tr '\n' ' ' | sed 's/ $//'
+    tar tzf "$dir"/out/*.tgz | sed 's|^package/||' | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//'
 }
 
 rm -rf "$work"
