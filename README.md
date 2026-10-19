@@ -5,7 +5,34 @@ existing npm and Bun projects.
 
 ## Open
 
-None as of `aube 2.8.0 linux-x64 (2026-10-19)`.
+- [`file-dep-peer-reresolve`](file-dep-peer-reresolve) (observed with
+  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when a
+  direct `file:` dependency satisfies a registry package's peer, aube cannot
+  re-resolve the tree. A fresh `aube install` works, but the next
+  `aube add is-number@7.0.0` fails with `ERR_AUBE_BLOCKED_EXOTIC_SUBDEP`,
+  naming the root's own `react@file:deps/react` as a transitive dependency of
+  `use-sync-external-store`. With `blockExoticSubdeps=false` it fails with
+  `ERR_AUBE_REGISTRY_ERROR` (`transitive local specifier file:deps/react
+  cannot be resolved without the parent package source root`). The same
+  happens from a pnpm-written lockfile. pnpm 11.10.0 and 12.14.0 add the
+  package. The security docs say direct dependencies pinned in
+  `package.json` stay allowed. Found in pingdotgg/t3code, where
+  `apps/mobile` depends on a `react-native-screens` tarball that
+  `@react-navigation/native-stack` peers on, so aube cannot change any
+  dependency in that tree.
+
+- [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed with
+  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when
+  `aube add` rewrites an npm `package-lock.json`, it drops
+  `"optional": true` from every platform package (26 for `esbuild`) and
+  `"hasInstallScript": true` from `esbuild`, with either node linker. npm
+  10.8.2 and 11.19.0 keep both flags on the same add. npm 10.8.2 `npm ci`
+  then fails with `EBADPLATFORM` for `@esbuild/aix-ppc64`; npm 11.19.0
+  accepts the result. The fixture lockfile comes from npm 11.19.0
+  `install --package-lock-only --ignore-scripts --no-audit --no-fund`, and
+  npm 10.8.2 leaves it byte-identical. Found adding two dev dependencies to an
+  npm project, where aube also reordered fields in 163 entries and dropped
+  `funding.type`.
 
 ## Intentional
 
