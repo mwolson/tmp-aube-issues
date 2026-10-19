@@ -20,6 +20,8 @@ existing npm and Bun projects.
   `apps/mobile` depends on a `react-native-screens` tarball that
   `@react-navigation/native-stack` peers on, so aube cannot change any
   dependency in that tree.
+  Upstream discussion:
+  [#1773 file-dep-peer-reresolve](https://github.com/aubepkg/aube/discussions/1773)
 
 - [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed with
   `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when
@@ -33,6 +35,8 @@ existing npm and Bun projects.
   npm 10.8.2 leaves it byte-identical. Found adding two dev dependencies to an
   npm project, where aube also reordered fields in 163 entries and dropped
   `funding.type`.
+  Upstream discussion:
+  [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774)
 
 ## Intentional
 
