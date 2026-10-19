@@ -15,6 +15,8 @@ existing npm and Bun projects.
   so this matches the docs but not pnpm. Found when a benchmark script set
   `CI=` to clear it, and aube quietly installed every project without the
   global virtual store.
+  Upstream discussion:
+  [#1776 empty-ci-env-is-ci](https://github.com/aubepkg/aube/discussions/1776)
 
 - [`file-dep-peer-reresolve`](file-dep-peer-reresolve) (observed with
   `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when a
@@ -43,6 +45,8 @@ existing npm and Bun projects.
   missing. The repro uses `--disable-global-virtual-store` so only the
   project's copy is damaged. Found while relinking checkouts after moving
   `storeDir`, where `--force` left the install on its old layout.
+  Upstream discussion:
+  [#1777 install-force-noop](https://github.com/aubepkg/aube/discussions/1777)
 
 - [`nonmember-subdir-installs-workspace-root`](nonmember-subdir-installs-workspace-root)
   (observed with `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): running
@@ -52,6 +56,8 @@ existing npm and Bun projects.
   its own, and also offers `--ignore-workspace`, which aube lacks. Found in a
   repo that keeps vendored grammar checkouts as submodules: `npm ci` in one
   of them, routed to aube, rebuilt the parent repo's `node_modules` instead.
+  Upstream discussion:
+  [#1778 nonmember-subdir-installs-workspace-root](https://github.com/aubepkg/aube/discussions/1778)
 
 - [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed with
   `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when
