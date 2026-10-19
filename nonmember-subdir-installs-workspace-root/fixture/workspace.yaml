@@ -1,0 +1,2 @@
+# Settings only, with no packages list.
+autoInstallPeers: true

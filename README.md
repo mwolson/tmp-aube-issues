@@ -5,6 +5,17 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`empty-ci-env-is-ci`](empty-ci-env-is-ci) (observed with
+  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): aube treats `CI=` (set
+  but empty) as CI, so `install` defaults to `--frozen-lockfile` and the
+  global virtual store turns off. With a stale lockfile, `CI= aube install`
+  fails while an unset `CI` updates the lockfile. pnpm 12.14.0 treats `CI=`
+  as not CI and only switches for `CI=1`. `aube config explain ci` says aube
+  treats the environment as CI "when the `CI` environment variable is set",
+  so this matches the docs but not pnpm. Found when a benchmark script set
+  `CI=` to clear it, and aube quietly installed every project without the
+  global virtual store.
+
 - [`file-dep-peer-reresolve`](file-dep-peer-reresolve) (observed with
   `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when a
   direct `file:` dependency satisfies a registry package's peer, aube cannot
@@ -22,6 +33,25 @@ existing npm and Bun projects.
   dependency in that tree.
   Upstream discussion:
   [#1773 file-dep-peer-reresolve](https://github.com/aubepkg/aube/discussions/1773)
+
+- [`install-force-noop`](install-force-noop) (observed with
+  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): `aube install --force`
+  prints `Already up to date` and does not reinstall when
+  `node_modules/.aube-state` looks fresh, although `--help` says it forces a
+  reinstall "ignoring lockfile/state freshness". After deleting an installed
+  file, pnpm 12.14.0 `install --force` restores it and aube leaves it
+  missing. The repro uses `--disable-global-virtual-store` so only the
+  project's copy is damaged. Found while relinking checkouts after moving
+  `storeDir`, where `--force` left the install on its old layout.
+
+- [`nonmember-subdir-installs-workspace-root`](nonmember-subdir-installs-workspace-root)
+  (observed with `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): running
+  `aube install` in a project below a settings-only `aube-workspace.yaml` or
+  `pnpm-workspace.yaml` (no `packages` list) installs the ancestor root
+  instead of the current project. pnpm 12.14.0 installs the subdirectory on
+  its own, and also offers `--ignore-workspace`, which aube lacks. Found in a
+  repo that keeps vendored grammar checkouts as submodules: `npm ci` in one
+  of them, routed to aube, rebuilt the parent repo's `node_modules` instead.
 
 - [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed with
   `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when

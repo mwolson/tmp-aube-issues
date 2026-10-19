@@ -1,0 +1,8 @@
+{
+  "name": "fixture",
+  "private": true,
+  "dependencies": {
+    "is-number": "7.0.0",
+    "kind-of": "6.0.3"
+  }
+}
