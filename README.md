@@ -5,6 +5,24 @@ existing npm and Bun projects.
 
 ## Open
 
+- [`hidden-hoist-version-choice`](hidden-hoist-version-choice) (observed
+  with `aube 2.8.1 linux-x64 (2026-10-20)`): when two versions of a package
+  are in the graph, aube's hidden hoist (`node_modules/.aube/node_modules`)
+  links the version whose dep path sorts first, while pnpm links the one
+  closest to an importer. With root dependencies `is-even@1.0.0` and
+  `is-odd@3.0.1`, the graph has `is-number@6.0.0` at depth 1 (under
+  `is-odd@3.0.1`) and `is-number@3.0.0` at depth 2 (under
+  `is-even@1.0.0 -> is-odd@0.1.2`). pnpm 11.10.0 and 12.14.0 hoist 6.0.0;
+  aube hoists 3.0.0 from the same pnpm lockfile, so an undeclared
+  `require("is-number")` inside `is-even` gets a different major version.
+  aube also hidden-hoists the root's own direct dependencies (`is-even`, and
+  `is-odd@0.1.2`, which shadows the root's `is-odd@3.0.1` for store
+  packages); pnpm leaves them out. Found in pingdotgg/t3code, where
+  `@voidzero-dev/vite-plus-core` (installed as `vite`) imports
+  `rolldown/experimental/runtime` without declaring `rolldown`: pnpm hoists
+  `rolldown@1.2.5`, aube hoists `rolldown@1.0.0-rc.17`, which lacks that
+  export.
+
 - [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (observed with
   `aube 2.8.1 linux-x64 (2026-10-20)`): when `aube add` rewrites an npm
   `package-lock.json`, it rewrites every existing entry, even though the add
