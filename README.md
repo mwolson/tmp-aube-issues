@@ -18,10 +18,14 @@ existing npm and Bun projects.
   aube also hidden-hoists the root's own direct dependencies (`is-even`, and
   `is-odd@0.1.2`, which shadows the root's `is-odd@3.0.1` for store
   packages); pnpm leaves them out. Found in pingdotgg/t3code, where
-  `@voidzero-dev/vite-plus-core` (installed as `vite`) imports
-  `rolldown/experimental/runtime` without declaring `rolldown`: pnpm hoists
-  `rolldown@1.2.5`, aube hoists `rolldown@1.0.0-rc.17`, which lacks that
-  export.
+  `@voidzero-dev/vite-plus-core` 1.3.0 (installed as `vite`) imports
+  `rolldown` and its subpaths (21 bare `rolldown` imports in `dist/`, plus
+  `rolldown/experimental`, `rolldown/utils`, and others) without declaring
+  it. pnpm 12.14.0 hoists `rolldown@1.2.5` and aube hoists
+  `rolldown@1.0.0-rc.17`, so every Vite+ build in an aube-installed tree
+  bundles with a different rolldown. One bundled-dev test fails outright
+  because 1.0.0-rc.17 lacks the `./experimental/runtime` export. The t3code
+  Nightly tree went back to pnpm because of this.
   Upstream discussion:
   [#1811 hidden-hoist-version-choice](https://github.com/aubepkg/aube/discussions/1811)
 
