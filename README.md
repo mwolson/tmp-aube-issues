@@ -18,6 +18,8 @@ existing npm and Bun projects.
   aube changed 2,663 lockfile lines where npm changed 843. The maintainer
   noted the reordering and `funding.type` as not yet addressed in
   [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774).
+  Upstream discussion:
+  [#1810 npm-lock-entry-rewrite](https://github.com/aubepkg/aube/discussions/1810)
 
 - [`pnpm-catalog-ranged-override-specifier`](pnpm-catalog-ranged-override-specifier)
   (observed with `aube 2.8.1 linux-x64 (2026-10-20)`, also 2.7.2): with
@@ -33,6 +35,8 @@ existing npm and Bun projects.
   aube still lists it. Found in pingdotgg/t3code, where
   `"undici@^8": "catalog:"` made pnpm reject the lockfile after an
   `aube add` in `apps/mobile`.
+  Upstream discussion:
+  [#1809 pnpm-catalog-ranged-override-specifier](https://github.com/aubepkg/aube/discussions/1809)
 
 ## Intentional
 
@@ -127,7 +131,8 @@ migration notes; the repro still exits non-zero while the difference holds.
   10.8.2 `npm ci` failed with `EBADPLATFORM`. Aube `2.8.1` keeps both flags,
   and npm 10.9.4 `ci` accepts the result. The field reordering and dropped
   `funding.type` seen in the same report are still open as
-  [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite).
+  [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (upstream discussion
+  [#1810 npm-lock-entry-rewrite](https://github.com/aubepkg/aube/discussions/1810)).
   Upstream discussion:
   [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774)
   Upstream fix:
