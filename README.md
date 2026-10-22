@@ -5,74 +5,34 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`empty-ci-env-is-ci`](empty-ci-env-is-ci) (observed with
-  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): aube treats `CI=` (set
-  but empty) as CI, so `install` defaults to `--frozen-lockfile` and the
-  global virtual store turns off. With a stale lockfile, `CI= aube install`
-  fails while an unset `CI` updates the lockfile. pnpm 12.14.0 treats `CI=`
-  as not CI and only switches for `CI=1`. `aube config explain ci` says aube
-  treats the environment as CI "when the `CI` environment variable is set",
-  so this matches the docs but not pnpm. Found when a benchmark script set
-  `CI=` to clear it, and aube quietly installed every project without the
-  global virtual store.
-  Upstream discussion:
-  [#1776 empty-ci-env-is-ci](https://github.com/aubepkg/aube/discussions/1776)
+- [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (observed with
+  `aube 2.8.1 linux-x64 (2026-10-20)`): when `aube add` rewrites an npm
+  `package-lock.json`, it rewrites every existing entry, even though the add
+  only needs new ones. With `ajv@8.17.1` as the only dev dependency,
+  `aube add is-number@7.0.0` changes all 5 existing entries: it moves
+  `"dev": true` after `license` and `funding`, drops `type` from `funding`
+  objects, and reduces `fast-uri`'s two-entry `funding` array to the first
+  URL. npm 10.8.2 and 11.19.1 leave all 5 entries untouched on the same add.
+  npm `ci` still accepts the result, so the cost is review noise plus the
+  lost funding data. In iow's admin frontend, a two-package dev add under
+  aube changed 2,663 lockfile lines where npm changed 843. The maintainer
+  noted the reordering and `funding.type` as not yet addressed in
+  [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774).
 
-- [`file-dep-peer-reresolve`](file-dep-peer-reresolve) (observed with
-  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when a
-  direct `file:` dependency satisfies a registry package's peer, aube cannot
-  re-resolve the tree. A fresh `aube install` works, but the next
-  `aube add is-number@7.0.0` fails with `ERR_AUBE_BLOCKED_EXOTIC_SUBDEP`,
-  naming the root's own `react@file:deps/react` as a transitive dependency of
-  `use-sync-external-store`. With `blockExoticSubdeps=false` it fails with
-  `ERR_AUBE_REGISTRY_ERROR` (`transitive local specifier file:deps/react
-  cannot be resolved without the parent package source root`). The same
-  happens from a pnpm-written lockfile. pnpm 11.10.0 and 12.14.0 add the
-  package. The security docs say direct dependencies pinned in
-  `package.json` stay allowed. Found in pingdotgg/t3code, where
-  `apps/mobile` depends on a `react-native-screens` tarball that
-  `@react-navigation/native-stack` peers on, so aube cannot change any
-  dependency in that tree.
-  Upstream discussion:
-  [#1773 file-dep-peer-reresolve](https://github.com/aubepkg/aube/discussions/1773)
-
-- [`install-force-noop`](install-force-noop) (observed with
-  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): `aube install --force`
-  prints `Already up to date` and does not reinstall when
-  `node_modules/.aube-state` looks fresh, although `--help` says it forces a
-  reinstall "ignoring lockfile/state freshness". After deleting an installed
-  file, pnpm 12.14.0 `install --force` restores it and aube leaves it
-  missing. The repro uses `--disable-global-virtual-store` so only the
-  project's copy is damaged. Found while relinking checkouts after moving
-  `storeDir`, where `--force` left the install on its old layout.
-  Upstream discussion:
-  [#1777 install-force-noop](https://github.com/aubepkg/aube/discussions/1777)
-
-- [`nonmember-subdir-installs-workspace-root`](nonmember-subdir-installs-workspace-root)
-  (observed with `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2): running
-  `aube install` in a project below a settings-only `aube-workspace.yaml` or
-  `pnpm-workspace.yaml` (no `packages` list) installs the ancestor root
-  instead of the current project. pnpm 12.14.0 installs the subdirectory on
-  its own, and also offers `--ignore-workspace`, which aube lacks. Found in a
-  repo that keeps vendored grammar checkouts as submodules: `npm ci` in one
-  of them, routed to aube, rebuilt the parent repo's `node_modules` instead.
-  Upstream discussion:
-  [#1778 nonmember-subdir-installs-workspace-root](https://github.com/aubepkg/aube/discussions/1778)
-
-- [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed with
-  `aube 2.8.0 linux-x64 (2026-10-19)`, also 2.7.2 and 1.41.0): when
-  `aube add` rewrites an npm `package-lock.json`, it drops
-  `"optional": true` from every platform package (26 for `esbuild`) and
-  `"hasInstallScript": true` from `esbuild`, with either node linker. npm
-  10.8.2 and 11.19.0 keep both flags on the same add. npm 10.8.2 `npm ci`
-  then fails with `EBADPLATFORM` for `@esbuild/aix-ppc64`; npm 11.19.0
-  accepts the result. The fixture lockfile comes from npm 11.19.0
-  `install --package-lock-only --ignore-scripts --no-audit --no-fund`, and
-  npm 10.8.2 leaves it byte-identical. Found adding two dev dependencies to an
-  npm project, where aube also reordered fields in 163 entries and dropped
-  `funding.type`.
-  Upstream discussion:
-  [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774)
+- [`pnpm-catalog-ranged-override-specifier`](pnpm-catalog-ranged-override-specifier)
+  (observed with `aube 2.8.1 linux-x64 (2026-10-20)`, also 2.7.2): with
+  `catalog: { is-odd: 3.0.1 }`, `overrides: { "is-odd@^3": "catalog:" }`, and
+  a root dependency `"is-odd": "catalog:"`, aube writes the importer
+  `specifier` as `3.0.1`. pnpm 11.10.0 and 12.14.0 keep `'catalog:'`, and
+  both reject the aube-written lockfile in `install --frozen-lockfile` with
+  `ERR_PNPM_OUTDATED_LOCKFILE` (`is-odd (lockfile: 3.0.1, manifest:
+  catalog:)`). The case starts from a pnpm-written lockfile for a manifest
+  without the dependency, so aube keeps writing `pnpm-lock.yaml`. A related
+  difference shows up when the override has no version range
+  (`is-number: "catalog:"`): pnpm leaves that entry out of `catalogs:`, and
+  aube still lists it. Found in pingdotgg/t3code, where
+  `"undici@^8": "catalog:"` made pnpm reject the lockfile after an
+  `aube add` in `apps/mobile`.
 
 ## Intentional
 
@@ -107,6 +67,71 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`empty-ci-env-is-ci`](empty-ci-env-is-ci) (observed with aube `2.7.2`,
+  fixed in aube `2.8.1`): aube used to treat `CI=` (set but empty) as CI, so
+  `install` defaulted to `--frozen-lockfile` and the global virtual store
+  turned off. With a stale lockfile, `CI= aube install` failed while an unset
+  `CI` updated the lockfile. pnpm 12.14.0 treats `CI=` as not CI. Aube `2.8.1`
+  does the same; `CI=0` and `CI=false` still count as CI. Found when a
+  benchmark script set `CI=` to clear it, and aube quietly installed every
+  project without the global virtual store.
+  Upstream discussion:
+  [#1776 empty-ci-env-is-ci](https://github.com/aubepkg/aube/discussions/1776)
+  Upstream fix:
+  [#1786 empty-ci-env](https://github.com/aubepkg/aube/pull/1786)
+
+- [`file-dep-peer-reresolve`](file-dep-peer-reresolve) (observed with aube
+  `1.41.0`, fixed in aube `2.8.1`): when a direct `file:` dependency
+  satisfied a registry package's peer, aube could not re-resolve the tree. A
+  fresh `aube install` worked, but the next `aube add is-number@7.0.0` failed
+  with `ERR_AUBE_BLOCKED_EXOTIC_SUBDEP`, or with `ERR_AUBE_REGISTRY_ERROR`
+  under `blockExoticSubdeps=false`. Aube `2.8.1` no longer treats the locked
+  peer edge as a transitive local source, so the add succeeds from both aube-
+  and pnpm-written lockfiles. Found in pingdotgg/t3code, where
+  `apps/mobile` depends on a `react-native-screens` tarball that
+  `@react-navigation/native-stack` peers on.
+  Upstream discussion:
+  [#1773 file-dep-peer-reresolve](https://github.com/aubepkg/aube/discussions/1773)
+  Upstream fix:
+  [#1775 npm-optional-file-peers](https://github.com/aubepkg/aube/pull/1775)
+
+- [`install-force-noop`](install-force-noop) (observed with aube `2.7.2`,
+  fixed in aube `2.8.1`): `aube install --force` used to print
+  `Already up to date` and skip the reinstall when `node_modules/.aube-state`
+  looked fresh, so a file deleted from `node_modules` stayed missing. Aube
+  `2.8.1` re-materializes every linked package, matching pnpm 12.14.0
+  `install --force`. Found while relinking checkouts after moving `storeDir`.
+  Upstream discussion:
+  [#1777 install-force-noop](https://github.com/aubepkg/aube/discussions/1777)
+  Upstream fix:
+  [#1789 install-force-relink](https://github.com/aubepkg/aube/pull/1789)
+
+- [`nonmember-subdir-installs-workspace-root`](nonmember-subdir-installs-workspace-root)
+  (observed with aube `2.7.2`, fixed in aube `2.8.1`): running
+  `aube install` in a project below a settings-only `aube-workspace.yaml` or
+  `pnpm-workspace.yaml` (no `packages` list) used to install the ancestor
+  root instead. Aube `2.8.1` installs the subdirectory on its own, as pnpm
+  12.14.0 does, and adds `--ignore-workspace`. Found in a repo that keeps
+  vendored grammar checkouts as submodules, where `npm ci` in one of them,
+  routed to aube, rebuilt the parent repo's `node_modules`.
+  Upstream discussion:
+  [#1778 nonmember-subdir-installs-workspace-root](https://github.com/aubepkg/aube/discussions/1778)
+  Upstream fix:
+  [#1787 nonmember-workspace](https://github.com/aubepkg/aube/pull/1787)
+
+- [`npm-lock-optional-flag-drop`](npm-lock-optional-flag-drop) (observed
+  with aube `1.41.0`, fixed in aube `2.8.1`): when `aube add` rewrote an npm
+  `package-lock.json`, it dropped `"optional": true` from every `esbuild`
+  platform package and `"hasInstallScript": true` from `esbuild`, so npm
+  10.8.2 `npm ci` failed with `EBADPLATFORM`. Aube `2.8.1` keeps both flags,
+  and npm 10.9.4 `ci` accepts the result. The field reordering and dropped
+  `funding.type` seen in the same report are still open as
+  [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite).
+  Upstream discussion:
+  [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774)
+  Upstream fix:
+  [#1775 npm-optional-file-peers](https://github.com/aubepkg/aube/pull/1775)
 
 - [`dir-flag-ancestor-package-json`](dir-flag-ancestor-package-json)
   (observed with aube `2.7.0`, fixed in aube `2.7.1`, retested on `2.7.2`
