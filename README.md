@@ -22,6 +22,8 @@ existing npm and Bun projects.
   `rolldown/experimental/runtime` without declaring `rolldown`: pnpm hoists
   `rolldown@1.2.5`, aube hoists `rolldown@1.0.0-rc.17`, which lacks that
   export.
+  Upstream discussion:
+  [#1811 hidden-hoist-version-choice](https://github.com/aubepkg/aube/discussions/1811)
 
 - [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (observed with
   `aube 2.8.1 linux-x64 (2026-10-20)`): when `aube add` rewrites an npm
