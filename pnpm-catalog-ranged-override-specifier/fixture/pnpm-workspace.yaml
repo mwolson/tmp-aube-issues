@@ -1,0 +1,5 @@
+catalog:
+  is-odd: 3.0.1
+
+overrides:
+  "is-odd@^3": "catalog:"
