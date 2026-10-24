@@ -34,7 +34,7 @@ existing npm and Bun projects.
   `react` and `react-dom` both declared, aube drops `"peer": true` from
   `react` and adds `react: 19.1.1` to `react-dom`'s `dependencies`. npm leaves
   every existing entry alone on the same add. aube documents
-  `autoInstallPeers` as on by default. Found in iow's admin frontend, where a
+  `autoInstallPeers` as on by default. Found in a private React frontend, where a
   two-package dev add changed 27 of 233 existing entries (npm changed 2).
   Upstream discussion:
   [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
@@ -142,7 +142,7 @@ migration notes; the repro still exits non-zero while the difference holds.
   npm 10.8.2 and 11.19.1 leave all 5 existing entries untouched on the same
   add. Aube `2.8.2` keeps npm's key order and the full `funding` value, so the
   case's add leaves all 5 entries unchanged. A newly resolved package with
-  funding is still written as `{"url": ...}`. Found in iow's admin frontend.
+  funding is still written as `{"url": ...}`. Found in a private React frontend.
   Upstream discussion:
   [#1810 npm-lock-entry-rewrite](https://github.com/aubepkg/aube/discussions/1810)
   Upstream fix:
