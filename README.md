@@ -22,6 +22,8 @@ existing npm and Bun projects.
   `@react-navigation/native-stack` cannot resolve the `react-native-screens`
   tarball in `apps/mobile`, so its header search bar callbacks lose their
   event types and `apps/mobile` fails typecheck (TS7006) under aube.
+  Upstream discussion:
+  [#1819 file-dep-peer-link-dangling](https://github.com/aubepkg/aube/discussions/1819)
 
 - [`npm-lock-peer-entries`](npm-lock-peer-entries) (observed with
   `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops or rewrites npm
@@ -34,6 +36,8 @@ existing npm and Bun projects.
   every existing entry alone on the same add. aube documents
   `autoInstallPeers` as on by default. Found in iow's admin frontend, where a
   two-package dev add changed 27 of 233 existing entries (npm changed 2).
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
 
 - [`pnpm-lock-peer-suffix-shape`](pnpm-lock-peer-suffix-shape) (observed with
   `aube 2.8.2 linux-x64 (2026-10-23)`): aube writes different peer suffixes
@@ -47,6 +51,8 @@ existing npm and Bun projects.
   lockfiles, so the cost is churn: in pingdotgg/t3code one `aube add` in
   `apps/mobile` rewrote about 1,300 lines of peer suffixes, including new
   `expo` hash suffixes that follow from these two differences.
+  Upstream discussion:
+  [#1823 pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823)
 
 - [`pnpm12-package-manager-document-drop`](pnpm12-package-manager-document-drop)
   (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): pnpm 12 writes
@@ -59,6 +65,8 @@ existing npm and Bun projects.
   `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`. pnpm's own add keeps the
   document. pnpm 11.10.0 does not write it for this manifest. Found in
   pingdotgg/t3code.
+  Upstream discussion:
+  [#1822 pnpm12-package-manager-document-drop](https://github.com/aubepkg/aube/discussions/1822)
 
 - [`workspace-root-bin-path`](workspace-root-bin-path) (observed with
   `aube 2.8.2 linux-x64 (2026-10-23)`): `aube run` in a workspace member does
@@ -68,6 +76,8 @@ existing npm and Bun projects.
   12.14.0 runs the member's `root-bin-probe` script, while aube fails with
   `command not found`. Found in pingdotgg/t3code, where `apps/mobile`'s
   `test` script calls `vp` from the root's `vite-plus`.
+  Upstream discussion:
+  [#1820 workspace-root-bin-path](https://github.com/aubepkg/aube/discussions/1820)
 
 ## Intentional
 
