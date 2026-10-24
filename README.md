@@ -5,62 +5,69 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`hidden-hoist-version-choice`](hidden-hoist-version-choice) (observed
-  with `aube 2.8.1 linux-x64 (2026-10-20)`): when two versions of a package
-  are in the graph, aube's hidden hoist (`node_modules/.aube/node_modules`)
-  links the version whose dep path sorts first, while pnpm links the one
-  closest to an importer. With root dependencies `is-even@1.0.0` and
-  `is-odd@3.0.1`, the graph has `is-number@6.0.0` at depth 1 (under
-  `is-odd@3.0.1`) and `is-number@3.0.0` at depth 2 (under
-  `is-even@1.0.0 -> is-odd@0.1.2`). pnpm 11.10.0 and 12.14.0 hoist 6.0.0;
-  aube hoists 3.0.0 from the same pnpm lockfile, so an undeclared
-  `require("is-number")` inside `is-even` gets a different major version.
-  aube also hidden-hoists the root's own direct dependencies (`is-even`, and
-  `is-odd@0.1.2`, which shadows the root's `is-odd@3.0.1` for store
-  packages); pnpm leaves them out. Found in pingdotgg/t3code, where
-  `@voidzero-dev/vite-plus-core` 1.3.0 (installed as `vite`) imports
-  `rolldown` and its subpaths (21 bare `rolldown` imports in `dist/`, plus
-  `rolldown/experimental`, `rolldown/utils`, and others) without declaring
-  it. pnpm 12.14.0 hoists `rolldown@1.2.5` and aube hoists
-  `rolldown@1.0.0-rc.17`, so every Vite+ build in an aube-installed tree
-  bundles with a different rolldown. One bundled-dev test fails outright
-  because 1.0.0-rc.17 lacks the `./experimental/runtime` export. The t3code
-  Nightly tree went back to pnpm because of this.
-  Upstream discussion:
-  [#1811 hidden-hoist-version-choice](https://github.com/aubepkg/aube/discussions/1811)
+- [`file-dep-peer-link-dangling`](file-dep-peer-link-dangling) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`, also 2.7.0 through 2.8.1): when a
+  registry package's peer is satisfied by a `file:` dependency, aube links
+  the peer under a name it never creates. Workspace member `app` depends on
+  `react` from `file:deps/react` and on `use-sync-external-store@1.5.0`, which
+  peers on `react`. After a frozen install from a pnpm 12.14.0 lockfile,
+  `use-sync-external-store`'s sibling `react` link points at
+  `../../react@file+app+deps+react/...`, while aube materializes the package
+  as `react@file+<hash>`, so `require("react")` from
+  `use-sync-external-store` fails with and without the global virtual store.
+  pnpm links the `file:` package. With aube's own `aube-lock.yaml` the link
+  works when the global virtual store is off and dangles when it is on. At the
+  workspace root the bug hides, because Node walks up to the root
+  `node_modules/react`. Found in pingdotgg/t3code, where
+  `@react-navigation/native-stack` cannot resolve the `react-native-screens`
+  tarball in `apps/mobile`, so its header search bar callbacks lose their
+  event types and `apps/mobile` fails typecheck (TS7006) under aube.
 
-- [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (observed with
-  `aube 2.8.1 linux-x64 (2026-10-20)`): when `aube add` rewrites an npm
-  `package-lock.json`, it rewrites every existing entry, even though the add
-  only needs new ones. With `ajv@8.17.1` as the only dev dependency,
-  `aube add is-number@7.0.0` changes all 5 existing entries: it moves
-  `"dev": true` after `license` and `funding`, drops `type` from `funding`
-  objects, and reduces `fast-uri`'s two-entry `funding` array to the first
-  URL. npm 10.8.2 and 11.19.1 leave all 5 entries untouched on the same add.
-  npm `ci` still accepts the result, so the cost is review noise plus the
-  lost funding data. In iow's admin frontend, a two-package dev add under
-  aube changed 2,663 lockfile lines where npm changed 843. The maintainer
-  noted the reordering and `funding.type` as not yet addressed in
-  [#1774 npm-lock-optional-flag-drop](https://github.com/aubepkg/aube/discussions/1774).
-  Upstream discussion:
-  [#1810 npm-lock-entry-rewrite](https://github.com/aubepkg/aube/discussions/1810)
+- [`npm-lock-peer-entries`](npm-lock-peer-entries) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops or rewrites npm
+  `package-lock.json` entries for peer dependencies. With only
+  `react-dom@19.1.1` declared, npm 11.6.2 auto-installs its `react` peer as a
+  `"peer": true` entry; `aube add is-number@7.0.0` removes that entry, and
+  `npm ci` then fails with `Missing: react@19.3.1 from lock file`. With
+  `react` and `react-dom` both declared, aube drops `"peer": true` from
+  `react` and adds `react: 19.1.1` to `react-dom`'s `dependencies`. npm leaves
+  every existing entry alone on the same add. aube documents
+  `autoInstallPeers` as on by default. Found in iow's admin frontend, where a
+  two-package dev add changed 27 of 233 existing entries (npm changed 2).
 
-- [`pnpm-catalog-ranged-override-specifier`](pnpm-catalog-ranged-override-specifier)
-  (observed with `aube 2.8.1 linux-x64 (2026-10-20)`, also 2.7.2): with
-  `catalog: { is-odd: 3.0.1 }`, `overrides: { "is-odd@^3": "catalog:" }`, and
-  a root dependency `"is-odd": "catalog:"`, aube writes the importer
-  `specifier` as `3.0.1`. pnpm 11.10.0 and 12.14.0 keep `'catalog:'`, and
-  both reject the aube-written lockfile in `install --frozen-lockfile` with
-  `ERR_PNPM_OUTDATED_LOCKFILE` (`is-odd (lockfile: 3.0.1, manifest:
-  catalog:)`). The case starts from a pnpm-written lockfile for a manifest
-  without the dependency, so aube keeps writing `pnpm-lock.yaml`. A related
-  difference shows up when the override has no version range
-  (`is-number: "catalog:"`): pnpm leaves that entry out of `catalogs:`, and
-  aube still lists it. Found in pingdotgg/t3code, where
-  `"undici@^8": "catalog:"` made pnpm reject the lockfile after an
-  `aube add` in `apps/mobile`.
-  Upstream discussion:
-  [#1809 pnpm-catalog-ranged-override-specifier](https://github.com/aubepkg/aube/discussions/1809)
+- [`pnpm-lock-peer-suffix-shape`](pnpm-lock-peer-suffix-shape) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): aube writes different peer suffixes
+  than pnpm in two cases. When `typescript` is aliased to
+  `npm:@tsc-rs/typescript@0.8.0`, pnpm 11.10.0 and 12.14.0 write
+  `ts-api-utils@2.1.0(@tsc-rs/typescript@0.8.0)` and aube writes
+  `ts-api-utils@2.1.0(typescript@0.8.0)`. When `ws@7.5.11`'s optional peer
+  `utf-8-validate@^5.0.2` is provided as 6.0.6, pnpm links it and writes
+  `ws@7.5.11(utf-8-validate@6.0.6)`, while aube writes `ws@7.5.11` (and still
+  lets `ws` resolve 6.0.6 at runtime). pnpm frozen-installs both aube
+  lockfiles, so the cost is churn: in pingdotgg/t3code one `aube add` in
+  `apps/mobile` rewrote about 1,300 lines of peer suffixes, including new
+  `expo` hash suffixes that follow from these two differences.
+
+- [`pnpm12-package-manager-document-drop`](pnpm12-package-manager-document-drop)
+  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): pnpm 12 writes
+  `pnpm-lock.yaml` as two YAML documents when `package.json` has a
+  `packageManager` field, starting with one that records
+  `packageManagerDependencies` for pnpm itself. aube reads that shape (since
+  [#116 multi-document-lockfile](https://github.com/aubepkg/aube/pull/116)),
+  but `aube add is-number@7.0.0` writes only the project document, and pnpm
+  12.14.0 `install --frozen-lockfile` then fails with
+  `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`. pnpm's own add keeps the
+  document. pnpm 11.10.0 does not write it for this manifest. Found in
+  pingdotgg/t3code.
+
+- [`workspace-root-bin-path`](workspace-root-bin-path) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube run` in a workspace member does
+  not put the workspace root's `node_modules/.bin` on the script's `PATH`.
+  pnpm documents that it does ("For workspaces,
+  `<workspace root>/node_modules/.bin` is also added to the PATH"), and pnpm
+  12.14.0 runs the member's `root-bin-probe` script, while aube fails with
+  `command not found`. Found in pingdotgg/t3code, where `apps/mobile`'s
+  `test` script calls `vp` from the root's `vite-plus`.
 
 ## Intentional
 
@@ -95,6 +102,59 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`hidden-hoist-version-choice`](hidden-hoist-version-choice) (observed
+  with aube `2.8.1`, fixed in aube `2.8.2`): when two versions of a package
+  were in the graph, aube's hidden hoist (`node_modules/.aube/node_modules`)
+  linked the version whose dep path sorted first, while pnpm links the one
+  closest to an importer. With root dependencies `is-even@1.0.0` and
+  `is-odd@3.0.1`, aube hoisted `is-number@3.0.0` (depth 2) where pnpm 11.10.0
+  and 12.14.0 hoist `is-number@6.0.0` (depth 1), so an undeclared
+  `require("is-number")` inside `is-even` got a different major version. aube
+  also hidden-hoisted the root's own direct dependencies. Aube `2.8.2` hoists
+  the shallowest version (ties go to the dep path that sorts first) and leaves
+  the root's direct dependencies out. Found in pingdotgg/t3code, where
+  `@voidzero-dev/vite-plus-core` 1.3.0 imports `rolldown` without declaring
+  it: aube hoisted `rolldown@1.0.0-rc.17` instead of pnpm's `1.2.5`, so Vite+
+  bundled with a different rolldown and `apps/web/src/bundledDev.test.ts`
+  failed. A frozen aube `2.8.2` install of the t3code tree hoists `1.2.5`, and
+  that test passes.
+  Upstream discussion:
+  [#1811 hidden-hoist-version-choice](https://github.com/aubepkg/aube/discussions/1811)
+  Upstream fix:
+  [#1815 hidden-hoist-shallowest](https://github.com/aubepkg/aube/pull/1815)
+
+- [`npm-lock-entry-rewrite`](npm-lock-entry-rewrite) (observed with aube
+  `2.8.1`, fixed in aube `2.8.2`): when `aube add` rewrote an npm
+  `package-lock.json`, it rewrote every existing entry: it moved
+  `"dev": true` after `license` and `funding`, dropped `type` from `funding`
+  objects, and cut `fast-uri`'s two-entry `funding` array to the first URL.
+  npm 10.8.2 and 11.19.1 leave all 5 existing entries untouched on the same
+  add. Aube `2.8.2` keeps npm's key order and the full `funding` value, so the
+  case's add leaves all 5 entries unchanged. A newly resolved package with
+  funding is still written as `{"url": ...}`. Found in iow's admin frontend.
+  Upstream discussion:
+  [#1810 npm-lock-entry-rewrite](https://github.com/aubepkg/aube/discussions/1810)
+  Upstream fix:
+  [#1814 npm-lock-preserve-entries](https://github.com/aubepkg/aube/pull/1814)
+
+- [`pnpm-catalog-ranged-override-specifier`](pnpm-catalog-ranged-override-specifier)
+  (observed with aube `2.7.2` and `2.8.1`, fixed in aube `2.8.2`): with
+  `catalog: { is-odd: 3.0.1 }`, `overrides: { "is-odd@^3": "catalog:" }`, and
+  a root dependency `"is-odd": "catalog:"`, aube wrote the importer
+  `specifier` as `3.0.1`. pnpm 11.10.0 and 12.14.0 keep `'catalog:'` and
+  rejected the aube-written lockfile in `install --frozen-lockfile` with
+  `ERR_PNPM_OUTDATED_LOCKFILE`. Aube `2.8.2` matches override selectors
+  against the manifest text as pnpm does, so a ranged override no longer
+  applies to a `catalog:` dependency; it keeps `specifier: 'catalog:'` and
+  pnpm 12.14.0 frozen-installs the result. Catalog entries referenced only by
+  an override value are no longer written to `catalogs:`. Found in
+  pingdotgg/t3code, where `"undici@^8": "catalog:"` made pnpm reject the
+  lockfile after an `aube add` in `apps/mobile`.
+  Upstream discussion:
+  [#1809 pnpm-catalog-ranged-override-specifier](https://github.com/aubepkg/aube/discussions/1809)
+  Upstream fix:
+  [#1816 catalog-ranged-override-specifier](https://github.com/aubepkg/aube/pull/1816)
 
 - [`empty-ci-env-is-ci`](empty-ci-env-is-ci) (observed with aube `2.7.2`,
   fixed in aube `2.8.1`): aube used to treat `CI=` (set but empty) as CI, so

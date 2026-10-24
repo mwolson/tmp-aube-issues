@@ -1,0 +1,8 @@
+{
+  "name": "app",
+  "private": true,
+  "dependencies": {
+    "react": "file:deps/react",
+    "use-sync-external-store": "1.5.0"
+  }
+}

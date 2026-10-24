@@ -1,0 +1,8 @@
+{
+  "name": "aliased-peer",
+  "private": true,
+  "dependencies": {
+    "ts-api-utils": "2.1.0",
+    "typescript": "npm:@tsc-rs/typescript@0.8.0"
+  }
+}

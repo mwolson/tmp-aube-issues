@@ -1,0 +1,7 @@
+{
+  "name": "peer-only",
+  "private": true,
+  "dependencies": {
+    "react-dom": "19.1.1"
+  }
+}

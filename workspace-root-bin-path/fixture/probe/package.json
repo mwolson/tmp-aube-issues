@@ -1,0 +1,7 @@
+{
+  "name": "probe",
+  "version": "1.0.0",
+  "bin": {
+    "root-bin-probe": "cli.js"
+  }
+}

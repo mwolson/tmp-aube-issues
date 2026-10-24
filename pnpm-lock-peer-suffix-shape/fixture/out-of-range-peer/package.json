@@ -1,0 +1,8 @@
+{
+  "name": "out-of-range-peer",
+  "private": true,
+  "dependencies": {
+    "utf-8-validate": "6.0.6",
+    "ws": "7.5.11"
+  }
+}
