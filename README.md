@@ -176,6 +176,8 @@ existing npm and Bun projects.
   project; a native npm or Bun lockfile moved into `locks/` is rejected
   because its implicit `.` root looks foreign. Native pnpm 12.14.0 passes the
   workspace lifecycle. Fixed in fork `2.8.2+mwolson.3`.
+  Upstream discussion:
+  [#1832 lockfile-dir-workspace-importers](https://github.com/aubepkg/aube/discussions/1832)
 
 ## Intentional
 
