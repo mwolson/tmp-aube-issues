@@ -1,0 +1,10 @@
+{
+  "name": "bundler",
+  "version": "1.0.0",
+  "dependencies": {
+    "is-number": "7.0.0"
+  },
+  "bundledDependencies": [
+    "is-number"
+  ]
+}

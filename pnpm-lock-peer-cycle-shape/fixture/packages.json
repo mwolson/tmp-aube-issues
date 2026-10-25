@@ -1,0 +1,27 @@
+{
+  "cycle-consumer": {
+    "1.0.0": {"peerDependencies": {"cycle-host": "*"}}
+  },
+  "cycle-host": {
+    "1.0.0": {"peerDependencies": {"cycle-plugin": "*"}}
+  },
+  "cycle-plugin": {
+    "1.0.0": {"peerDependencies": {"cycle-host": "*"}}
+  },
+  "extra": {
+    "1.0.0": {}
+  },
+  "provider-consumer": {
+    "1.0.0": {
+      "peerDependencies": {"provider-peer": "*"},
+      "peerDependenciesMeta": {"provider-peer": {"optional": true}}
+    }
+  },
+  "provider-hidden": {
+    "1.0.0": {"dependencies": {"provider-peer": "2.0.0"}}
+  },
+  "provider-peer": {
+    "1.0.0": {},
+    "2.0.0": {}
+  }
+}

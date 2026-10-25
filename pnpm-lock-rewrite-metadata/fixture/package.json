@@ -1,0 +1,7 @@
+{
+  "name": "pnpm-lock-rewrite-metadata",
+  "private": true,
+  "dependencies": {
+    "bundler": "file:deps/bundler.tgz"
+  }
+}

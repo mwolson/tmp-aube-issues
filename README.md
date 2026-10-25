@@ -79,6 +79,78 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1820 workspace-root-bin-path](https://github.com/aubepkg/aube/discussions/1820)
 
+- [`npm-lock-new-entry-install-script`](npm-lock-new-entry-install-script)
+  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): new `package-lock.json`
+  entries written by `aube add` lack `hasInstallScript`, so a later `npm ci`
+  silently skips install scripts such as msw's postinstall. Fixed in fork
+  `2.8.2+mwolson.1`.
+
+- [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with `aube
+  2.8.2 linux-x64 (2026-10-23)`): an unrelated `aube add` drops an existing
+  entry's `bundleDependencies`, so npm treats the bundled `tslib` as an
+  ordinary dependency and `npm ci` fails with `Missing: tslib@2.8.1 from lock
+  file`; a second fixture loses valid nested placements. Follow-up for [#1821
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
+  Fixed in fork `2.8.2+mwolson.1`.
+
+- [`pnpm-lock-rewrite-metadata`](pnpm-lock-rewrite-metadata) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops pnpm 12's
+  `settings.peersSuffixMaxLength`, so `pnpm install --frozen-lockfile` fails
+  with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, and loses local tarball
+  `version`/`integrity` and `bundledDependencies`. Fixed in fork
+  `2.8.2+mwolson.1`.
+
+- [`pnpm-lock-peer-cycle-shape`](pnpm-lock-peer-cycle-shape) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): an unrelated add contextualizes a
+  cyclic peer provider that pnpm 11.10.0 and 12.14.0 keep bare, changing its
+  suffix hash, and collapses a retained optional-peer provider context.
+  Follow-up for [#1823
+  pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823).
+  Fixed in fork `2.8.2+mwolson.1`.
+
+- [`npm-workspace-local-dir-spec`](npm-workspace-local-dir-spec) (observed
+  with `aube 2.8.2 linux-x64 (2026-10-23)`): a fresh npm workspace install
+  writes `leaf: file+<hash>` for a local package's absolute `file:`
+  dependency, and aube's own frozen install then rejects the lockfile with
+  `manifest adds leaf@file:<path>`. npm 11.6.2 keeps the declared spec. Fixed
+  in fork `2.8.2+mwolson.2`.
+
+- [`npm-linked-dir-tarball-child`](npm-linked-dir-tarball-child) (observed
+  with `aube 2.8.2 linux-x64 (2026-10-23)`): after a clean frozen install from
+  `package-lock.json`, a `file:`-linked directory cannot load its local
+  tarball dependency (`MODULE_NOT_FOUND`), although the install exits 0. npm
+  11.6.2 loads it after `npm ci`. Fixed in fork `2.8.2+mwolson.2`.
+
+- [`bun-reload-member-peer`](bun-reload-member-peer) (observed with `aube
+  2.8.2 linux-x64 (2026-10-23)`): a clean frozen `bun.lock` install switches a
+  workspace member's consumer from the member's React 19 peer to root React
+  18. Bun 1.4.3 keeps 19.0.0. Fixed in fork `2.8.2+mwolson.2`.
+
+- [`bun-native-relative-tarball`](bun-native-relative-tarball) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): a frozen import of a native `bun.lock`
+  resolves a member's hoisted `../../consumer.tgz` from the project root and
+  fails before linking. Bun 1.4.3 fresh and frozen installs pass. Fixed in
+  fork `2.8.2+mwolson.2`.
+
+- [`tarball-transitive-local-dep`](tarball-transitive-local-dep) (observed
+  with `aube 2.8.2 linux-x64 (2026-10-23)`): a local tarball's absolute
+  `file:` child fails fresh resolution (`cannot be resolved without the parent
+  package source root`) even with `block-exotic-subdeps=false`. pnpm 12.14.0,
+  npm 11.6.2 and Bun 1.4.3 accept it. Fixed in fork `2.8.2+mwolson.2`.
+
+- [`bun-lock-absolute-dir-ident`](bun-lock-absolute-dir-ident) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): once a tarball's absolute directory
+  child resolves, aube writes an absolute `bun.lock` folder identifier that
+  Bun 1.4.3 rejects as unsafe in a hoisted frozen install; upstream fails
+  earlier at the resolution step in `tarball-transitive-local-dep`. Fixed in
+  fork `2.8.2+mwolson.2`.
+
+- [`npm-lock-absolute-dir-key`](npm-lock-absolute-dir-key) (observed with
+  `aube 2.8.2 linux-x64 (2026-10-23)`): an absolute `file:` directory
+  dependency gets its absolute path as the `package-lock.json` target key and
+  `resolved`, and `npm ci` fails with `EUSAGE`. npm 11.6.2 writes the
+  root-relative key. Fixed in fork `2.8.2+mwolson.2`.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
