@@ -3,3 +3,8 @@ tmp/
 .repro-work/
 pnpm-patch-plain-unified-diff/pnpm-lock.yaml
 pnpm-patch-plain-unified-diff/aube-lock.yaml
+hoisted-react-peer-duplication/aube-lock.yaml
+package-config-symlink-resolution/.tmp/
+package-config-symlink-resolution/aube-lock.yaml
+package-config-symlink-resolution/packages/*.tgz
+pnpm-bin-workspace-flag/aube-lock.yaml

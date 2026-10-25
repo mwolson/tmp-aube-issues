@@ -23,7 +23,7 @@ fi
 
 cd "$(dirname "$0")"
 work="$PWD/.repro-work"
-rm -rf "$work"
+rm -rf "${work:?}"
 pnpm_version=$("$PNPM_BIN" --version)
 aube_version=$("$AUBE_BIN" --version)
 

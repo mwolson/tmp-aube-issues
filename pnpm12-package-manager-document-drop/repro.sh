@@ -18,7 +18,7 @@ fi
 
 cd "$(dirname "$0")"
 work="$PWD/.repro-work"
-rm -rf "$work"
+rm -rf "${work:?}"
 
 # Keep every store and cache inside .repro-work.
 export AUBE_STORE_DIR="$work/aube-store" AUBE_CACHE_DIR="$work/aube-cache"

@@ -18,7 +18,7 @@ fi
 
 cd "$(dirname "$0")"
 work="$PWD/.repro-work"
-rm -rf "$work"
+rm -rf "${work:?}"
 npm_version=$("$NPM_BIN" --version)
 aube_version=$("$AUBE_BIN" --version)
 
@@ -56,7 +56,7 @@ changed_entries() {
 }
 
 npm_ci() {
-    rm -rf "$1/node_modules"
+    rm -rf "${1:?}/node_modules"
     if (cd "$1" && "$NPM_BIN" ci --ignore-scripts --no-audit --no-fund >"$1.ci.log" 2>&1); then
         echo ok
     else

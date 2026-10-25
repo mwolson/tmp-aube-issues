@@ -135,7 +135,7 @@ cd "$ROOT"
 setup
 cd .repro-work
 CI=1 "$PNPM_BIN" install --ignore-scripts --lockfile-only
-if ! "$AUBE_BIN" add --filter app is-odd@3.0.1 --ignore-scripts --reporter append-only; then
+if ! "$AUBE_BIN" add --filter app is-odd@3.0.1 --ignore-scripts --allow-low-downloads --reporter append-only; then
     echo "aube add failed" >&2
     exit 1
 fi
