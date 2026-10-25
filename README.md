@@ -169,6 +169,14 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1831 npm-lock-absolute-dir-key](https://github.com/aubepkg/aube/discussions/1831)
 
+- [`lockfile-dir-workspace-importers`](lockfile-dir-workspace-importers)
+  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): a workspace using
+  `--lockfile-dir=locks` writes its lockfile, then its next frozen install
+  exits 11 because aube treats the `apps/app` member it just wrote as another
+  project; a native npm or Bun lockfile moved into `locks/` is rejected
+  because its implicit `.` root looks foreign. Native pnpm 12.14.0 passes the
+  workspace lifecycle. Fixed in fork `2.8.2+mwolson.3`.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
