@@ -851,7 +851,7 @@ migration notes; the repro still exits non-zero while the difference holds.
 ## Mitigated
 
 - [`package-config-symlink-resolution`](package-config-symlink-resolution)
-  (observed with aube `1.15.0`, still present with aube `1.37.0` in default
+  (observed with aube `1.15.0`, still present with aube `2.8.2` in default
   isolated mode): aube installs a package whose config file requires one of that
   package's declared dependencies, but loading that config through the package's
   top-level `node_modules/<pkg>` symlink cannot resolve the declared dependency.
