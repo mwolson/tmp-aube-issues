@@ -112,7 +112,7 @@ existing npm and Bun projects.
   `schema-utils/node_modules/ajv` copy. npm 11.6.2 keeps the flag. Fixed in
   fork `2.8.2+mwolson.5`.
   Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
 
 - [`npm-lock-nested-peer-add`](npm-lock-nested-peer-add) (observed with `aube
   2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): two installed copies of
@@ -121,14 +121,14 @@ existing npm and Bun projects.
   it to the ordinary copy). npm 11.6.2 keeps both copies as they were. Fixed
   in fork `2.8.2+mwolson.5`.
   Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
 
 - [`npm-lock-package-workspaces`](npm-lock-package-workspaces) (observed with
   `aube 2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): an unrelated `aube add`
   removes the `workspaces` array that npm records on an installed package's
   own entry (`vitefu`). npm 11.6.2 keeps it. Fixed in fork `2.8.2+mwolson.5`.
   Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
 
 - [`pnpm-lock-rewrite-metadata`](pnpm-lock-rewrite-metadata) (observed with
   `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops pnpm 12's
