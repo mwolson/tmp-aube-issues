@@ -103,16 +103,16 @@ existing npm and Bun projects.
   then rejects the lockfile. npm's own add keeps the entry and its `ci`
   passes. Found in a private npm 11.6.2 project. Fixed in fork
   `2.8.2+mwolson.5`.
-  Related: [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
+  Upstream discussion:
+  [#1841 npm-lock-optional-orphan](https://github.com/aubepkg/aube/discussions/1841)
 
 - [`npm-lock-nested-peer-drop`](npm-lock-nested-peer-drop) (observed with
   `aube 2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): with two installed copies
   of `ajv`, an unrelated `aube add` removes `"peer": true` from the nested
   `schema-utils/node_modules/ajv` copy. npm 11.6.2 keeps the flag. Fixed in
   fork `2.8.2+mwolson.5`.
-  Related: [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
+  Follow-up for [#1821
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
 
 - [`npm-lock-nested-peer-add`](npm-lock-nested-peer-add) (observed with `aube
   2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): two installed copies of
@@ -120,15 +120,15 @@ existing npm and Bun projects.
   `"peer": true` from tinyglobby's copy (an earlier fork build instead added
   it to the ordinary copy). npm 11.6.2 keeps both copies as they were. Fixed
   in fork `2.8.2+mwolson.5`.
-  Related: [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
+  Follow-up for [#1821
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
 
 - [`npm-lock-package-workspaces`](npm-lock-package-workspaces) (observed with
   `aube 2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): an unrelated `aube add`
   removes the `workspaces` array that npm records on an installed package's
   own entry (`vitefu`). npm 11.6.2 keeps it. Fixed in fork `2.8.2+mwolson.5`.
-  Related: [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
+  Follow-up for [#1821
+  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821/#discussioncomment-19182143).
 
 - [`pnpm-lock-rewrite-metadata`](pnpm-lock-rewrite-metadata) (observed with
   `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops pnpm 12's
