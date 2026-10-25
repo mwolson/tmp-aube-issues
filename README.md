@@ -87,6 +87,15 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1824 npm-lock-new-entry-install-script](https://github.com/aubepkg/aube/discussions/1824)
 
+- [`npm-lock-new-entry-libc`](npm-lock-new-entry-libc) (observed with
+  `aube 2.8.3 linux-x64 (2026-10-25)`, also main `79272433`): new
+  `package-lock.json` entries always get `libc`, which npm 11.10.1 and older
+  omit and strip again on their next write. In a project whose lockfile npm
+  11.6.2 wrote, `aube add @rollup/rollup-linux-x64-gnu` adds
+  `"libc": ["glibc"]` where npm adds none. Fork fix in
+  [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7)
+  (follows the existing lockfile, then `packageManager`).
+
 - [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with `aube
   2.8.2 linux-x64 (2026-10-23)`): an unrelated `aube add` drops an existing
   entry's `bundleDependencies`, so npm treats the bundled `tslib` as an

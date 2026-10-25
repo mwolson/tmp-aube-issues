@@ -1,0 +1,8 @@
+{
+  "name": "npm-lock-new-entry-libc",
+  "version": "1.0.0",
+  "packageManager": "npm@11.20.0",
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-musl": "4.53.3"
+  }
+}
