@@ -1,0 +1,8 @@
+{
+  "name": "lockfile-repro",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "vitefu": "1.1.3"
+  }
+}

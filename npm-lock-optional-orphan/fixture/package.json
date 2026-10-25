@@ -1,0 +1,12 @@
+{
+  "name": "lockfile-repro",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@emnapi/core": "1.11.2",
+    "@napi-rs/wasm-runtime": "0.2.12"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-wasm32-wasi": "1.0.3"
+  }
+}
