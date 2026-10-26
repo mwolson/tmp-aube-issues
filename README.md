@@ -101,13 +101,17 @@ existing npm and Bun projects.
   joins an npm workspace, `aube install` writes nothing for a member without
   dependencies (`npm ci`: `Missing: b@1.0.0 from lock file`), and a member with
   dependencies gets `name` added and `os`/`cpu` left out compared with npm
-  11.6.2.
+  11.6.2. Upstream discussion:
+  [#1875 npm-lock-new-workspace-member](https://github.com/aubepkg/aube/discussions/1875)
 
 - [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
   (observed with main `3c226195`, not with released 2.8.3): a registry package
   that bundles an optional dependency gets
   `{ "__aube_npm_bundled_optional": ... }` in its `bun.lock` metadata slot,
-  which Bun never writes and drops on its next install.
+  which Bun never writes and drops on its next install. Fork fix in
+  [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7).
+  Follow-up for
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19186457).
 
 - [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with `aube
   2.8.2 linux-x64 (2026-10-23)`): an unrelated `aube add` drops an existing
