@@ -101,7 +101,9 @@ existing npm and Bun projects.
   joins an npm workspace, `aube install` writes nothing for a member without
   dependencies (`npm ci`: `Missing: b@1.0.0 from lock file`), and a member with
   dependencies gets `name` added and `os`/`cpu` left out compared with npm
-  11.6.2. Upstream discussion:
+  11.6.2. Fork fix in
+  [#23 npm-lock-new-workspace-member](https://github.com/mwolson/aube/pull/23)
+  (`2.8.3+mwolson.3`). Upstream discussion:
   [#1875 npm-lock-new-workspace-member](https://github.com/aubepkg/aube/discussions/1875)
 
 - [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
