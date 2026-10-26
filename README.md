@@ -96,6 +96,19 @@ existing npm and Bun projects.
   [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7)
   (follows the existing lockfile, then `packageManager`).
 
+- [`npm-lock-new-workspace-member`](npm-lock-new-workspace-member) (observed
+  with `aube 2.8.3 linux-x64 (2026-10-25)`, also main `3c226195`): after a new member
+  joins an npm workspace, `aube install` writes nothing for a member without
+  dependencies (`npm ci`: `Missing: b@1.0.0 from lock file`), and a member with
+  dependencies gets `name` added and `os`/`cpu` left out compared with npm
+  11.6.2.
+
+- [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
+  (observed with main `3c226195`, not with released 2.8.3): a registry package
+  that bundles an optional dependency gets
+  `{ "__aube_npm_bundled_optional": ... }` in its `bun.lock` metadata slot,
+  which Bun never writes and drops on its next install.
+
 - [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with `aube
   2.8.2 linux-x64 (2026-10-23)`): an unrelated `aube add` drops an existing
   entry's `bundleDependencies`, so npm treats the bundled `tslib` as an

@@ -1,0 +1,8 @@
+{
+  "name": "npm-lock-new-workspace-member",
+  "version": "1.0.0",
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "a"
+  ]
+}
