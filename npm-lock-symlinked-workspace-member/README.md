@@ -63,7 +63,7 @@ frozen install failing at the parse step in all three scenarios.
 
 Fork fix in
 [#25 npm-lock-symlinked-workspace-member](https://github.com/mwolson/aube/pull/25):
-exit 0 with `aube 2.8.3+mwolson.4 linux-x64 (2026-10-26)` `2.8.3+mwolson.5` and
+exit 0 with `aube 2.8.3+mwolson.4 linux-x64 (2026-10-26)`, `2.8.3+mwolson.5` and
 `2.8.3+mwolson.6`.
 
 Upstream discussion:
