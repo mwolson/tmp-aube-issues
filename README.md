@@ -118,7 +118,8 @@ existing npm and Bun projects.
   `npm ci` accepts the lockfile.
   Fork fix in
   [#25 npm-lock-symlinked-workspace-member](https://github.com/mwolson/aube/pull/25)
-  (`2.8.3+mwolson.4`).
+  (`2.8.3+mwolson.4`). Upstream discussion:
+  [#1877 npm-lock-symlinked-workspace-member](https://github.com/aubepkg/aube/discussions/1877)
 
 - [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
   (observed with main `3c226195`, not with released 2.8.3): a registry package
