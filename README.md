@@ -106,6 +106,20 @@ existing npm and Bun projects.
   (`2.8.3+mwolson.3`). Upstream discussion:
   [#1875 npm-lock-new-workspace-member](https://github.com/aubepkg/aube/discussions/1875)
 
+- [`npm-lock-symlinked-workspace-member`](npm-lock-symlinked-workspace-member)
+  (observed with `aube 2.8.3 linux-x64 (2026-10-25)`, also main `3c226195`):
+  npm writes entries outside `node_modules` that it never installs: an
+  extraneous entry for a member reached through a symlinked folder
+  (`"../ext/b"`) or a deleted member (`"packages/b"`), both from npm 11.14.1
+  and older, and, from every npm version, an unflagged entry for a member
+  dropped from `workspaces` while its subfolder stays a member. aube cannot
+  derive a name for them and fails every lockfile read with
+  `ERR_AUBE_LOCKFILE_PARSE ... could not determine package name`, while
+  `npm ci` accepts the lockfile.
+  Fork fix in
+  [#25 npm-lock-symlinked-workspace-member](https://github.com/mwolson/aube/pull/25)
+  (`2.8.3+mwolson.4`).
+
 - [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
   (observed with main `3c226195`, not with released 2.8.3): a registry package
   that bundles an optional dependency gets
