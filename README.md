@@ -62,6 +62,14 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830)
 
+- [`npm-lock-frozen-member-drift`](npm-lock-frozen-member-drift) (observed with
+  `aube 2.8.4 linux-x64 (2026-10-27)`): `aube install --frozen-lockfile` accepts
+  an npm lockfile that `npm ci` 11.6.2 rejects with `Missing: c@1.0.0 from lock
+  file`, when a workspace member's `name` changes while its folder stays and when
+  a dependency-free member joins a project that uses `npm-shrinkwrap.json`.
+  Fork fix in
+  [#23 npm-lock-new-workspace-member](https://github.com/mwolson/aube/pull/23).
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
