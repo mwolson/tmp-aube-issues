@@ -5,257 +5,62 @@ existing npm and Bun projects.
 
 ## Open
 
-- [`file-dep-peer-link-dangling`](file-dep-peer-link-dangling) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`, also 2.7.0 through 2.8.1): when a
-  registry package's peer is satisfied by a `file:` dependency, aube links
-  the peer under a name it never creates. Workspace member `app` depends on
-  `react` from `file:deps/react` and on `use-sync-external-store@1.5.0`, which
-  peers on `react`. After a frozen install from a pnpm 12.14.0 lockfile,
-  `use-sync-external-store`'s sibling `react` link points at
-  `../../react@file+app+deps+react/...`, while aube materializes the package
-  as `react@file+<hash>`, so `require("react")` from
-  `use-sync-external-store` fails with and without the global virtual store.
-  pnpm links the `file:` package. With aube's own `aube-lock.yaml` the link
-  works when the global virtual store is off and dangles when it is on. At the
-  workspace root the bug hides, because Node walks up to the root
-  `node_modules/react`. Found in pingdotgg/t3code, where
-  `@react-navigation/native-stack` cannot resolve the `react-native-screens`
-  tarball in `apps/mobile`, so its header search bar callbacks lose their
-  event types and `apps/mobile` fails typecheck (TS7006) under aube.
-  Upstream discussion:
-  [#1819 file-dep-peer-link-dangling](https://github.com/aubepkg/aube/discussions/1819)
-
-- [`npm-lock-peer-entries`](npm-lock-peer-entries) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops or rewrites npm
-  `package-lock.json` entries for peer dependencies. With only
-  `react-dom@19.1.1` declared, npm 11.6.2 auto-installs its `react` peer as a
-  `"peer": true` entry; `aube add is-number@7.0.0` removes that entry, and
-  `npm ci` then fails with `Missing: react@19.3.1 from lock file`. With
-  `react` and `react-dom` both declared, aube drops `"peer": true` from
-  `react` and adds `react: 19.1.1` to `react-dom`'s `dependencies`. npm leaves
-  every existing entry alone on the same add. aube documents
-  `autoInstallPeers` as on by default. Found in a private React frontend, where a
-  two-package dev add changed 27 of 233 existing entries (npm changed 2).
-  Upstream discussion:
-  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
-
-- [`pnpm-lock-peer-suffix-shape`](pnpm-lock-peer-suffix-shape) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): aube writes different peer suffixes
-  than pnpm in two cases. When `typescript` is aliased to
-  `npm:@tsc-rs/typescript@0.8.0`, pnpm 11.10.0 and 12.14.0 write
-  `ts-api-utils@2.1.0(@tsc-rs/typescript@0.8.0)` and aube writes
-  `ts-api-utils@2.1.0(typescript@0.8.0)`. When `ws@7.5.11`'s optional peer
-  `utf-8-validate@^5.0.2` is provided as 6.0.6, pnpm links it and writes
-  `ws@7.5.11(utf-8-validate@6.0.6)`, while aube writes `ws@7.5.11` (and still
-  lets `ws` resolve 6.0.6 at runtime). pnpm frozen-installs both aube
-  lockfiles, so the cost is churn: in pingdotgg/t3code one `aube add` in
-  `apps/mobile` rewrote about 1,300 lines of peer suffixes, including new
-  `expo` hash suffixes that follow from these two differences.
-  Upstream discussion:
-  [#1823 pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823)
-
-- [`pnpm12-package-manager-document-drop`](pnpm12-package-manager-document-drop)
-  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): pnpm 12 writes
-  `pnpm-lock.yaml` as two YAML documents when `package.json` has a
-  `packageManager` field, starting with one that records
-  `packageManagerDependencies` for pnpm itself. aube reads that shape (since
-  [#116 multi-document-lockfile](https://github.com/aubepkg/aube/pull/116)),
-  but `aube add is-number@7.0.0` writes only the project document, and pnpm
-  12.14.0 `install --frozen-lockfile` then fails with
-  `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`. pnpm's own add keeps the
-  document. pnpm 11.10.0 does not write it for this manifest. Found in
-  pingdotgg/t3code.
-  Upstream discussion:
-  [#1822 pnpm12-package-manager-document-drop](https://github.com/aubepkg/aube/discussions/1822)
-
-- [`workspace-root-bin-path`](workspace-root-bin-path) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube run` in a workspace member does
-  not put the workspace root's `node_modules/.bin` on the script's `PATH`.
-  pnpm documents that it does ("For workspaces,
-  `<workspace root>/node_modules/.bin` is also added to the PATH"), and pnpm
-  12.14.0 runs the member's `root-bin-probe` script, while aube fails with
-  `command not found`. Found in pingdotgg/t3code, where `apps/mobile`'s
-  `test` script calls `vp` from the root's `vite-plus`.
-  Upstream discussion:
-  [#1820 workspace-root-bin-path](https://github.com/aubepkg/aube/discussions/1820)
-
 - [`npm-lock-new-entry-install-script`](npm-lock-new-entry-install-script)
-  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): new `package-lock.json`
-  entries written by `aube add` lack `hasInstallScript`, so a later `npm ci`
-  silently skips install scripts such as msw's postinstall. Fixed in fork
-  `2.8.2+mwolson.1`.
+  (observed with aube `2.8.2`, still present with aube `2.8.4`): new
+  `package-lock.json` entries written by `aube add` lack `hasInstallScript`, so a
+  later `npm ci` silently skips install scripts such as msw's postinstall.
+  [#1846 npm-install-script](https://github.com/aubepkg/aube/pull/1846)
+  copies the abbreviated packument's flag, but with the default
+  `minimumReleaseAge` aube fetches the full packument, which has `scripts`
+  instead. Fixed in fork `2.8.2+mwolson.1`.
   Upstream discussion:
   [#1824 npm-lock-new-entry-install-script](https://github.com/aubepkg/aube/discussions/1824)
 
-- [`npm-lock-new-entry-libc`](npm-lock-new-entry-libc) (observed with
-  `aube 2.8.3 linux-x64 (2026-10-25)`, also main `79272433`): new
-  `package-lock.json` entries always get `libc`, which npm 11.10.1 and older
-  omit and strip again on their next write. In a project whose lockfile npm
-  11.6.2 wrote, `aube add @rollup/rollup-linux-x64-gnu` adds
-  `"libc": ["glibc"]` where npm adds none. Fork fix in
-  [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7)
-  (follows the existing lockfile, then `packageManager`).
-
-- [`npm-lock-new-workspace-member`](npm-lock-new-workspace-member) (observed
-  with `aube 2.8.3 linux-x64 (2026-10-25)`, also main `3c226195`): after a new member
-  joins an npm workspace, `aube install` writes nothing for a member without
-  dependencies (`npm ci`: `Missing: b@1.0.0 from lock file`), and a member with
-  dependencies gets `name` added and `os`/`cpu` left out compared with npm
-  11.6.2. Fork fix in
-  [#23 npm-lock-new-workspace-member](https://github.com/mwolson/aube/pull/23)
-  (`2.8.3+mwolson.3`). Upstream discussion:
-  [#1875 npm-lock-new-workspace-member](https://github.com/aubepkg/aube/discussions/1875)
-
 - [`npm-lock-symlinked-workspace-member`](npm-lock-symlinked-workspace-member)
-  (observed with `aube 2.8.3 linux-x64 (2026-10-25)`, also main `3c226195`):
-  npm writes entries outside `node_modules` that it never installs: an
-  extraneous entry for a member reached through a symlinked folder
-  (`"../ext/b"`) or a deleted member (`"packages/b"`), both from npm 11.14.1
-  and older, and, from every npm version, an unflagged entry for a member
-  dropped from `workspaces` while its subfolder stays a member. aube cannot
-  derive a name for them and fails every lockfile read with
-  `ERR_AUBE_LOCKFILE_PARSE ... could not determine package name`, while
-  `npm ci` accepts the lockfile.
+  (observed with aube `2.8.3`, partly fixed in aube `2.8.4`): npm writes entries
+  outside `node_modules` that it never installs: an extraneous entry for a member
+  reached through a symlinked folder (`"../ext/b"`) or a deleted member
+  (`"packages/b"`), both from npm 11.14.1 and older, and, from every npm version,
+  an unflagged entry for a member dropped from `workspaces` while its subfolder
+  stays a member. Aube `2.8.3` failed every lockfile read with
+  `ERR_AUBE_LOCKFILE_PARSE ... could not determine package name`.
+  [#1878 npm-extraneous-parse](https://github.com/aubepkg/aube/pull/1878)
+  in aube `2.8.4` fixes the read, so frozen installs pass, but `aube add` still drops these entries, which npm keeps.
   Fork fix in
   [#25 npm-lock-symlinked-workspace-member](https://github.com/mwolson/aube/pull/25)
   (`2.8.3+mwolson.4`). Upstream discussion:
   [#1877 npm-lock-symlinked-workspace-member](https://github.com/aubepkg/aube/discussions/1877)
 
 - [`bun-lock-npm-bundled-optional-meta`](bun-lock-npm-bundled-optional-meta)
-  (observed with main `3c226195`, not with released 2.8.3): a registry package
-  that bundles an optional dependency gets
+  (observed with aube `2.8.4` and main `3c226195`, not with released 2.8.3): a
+  registry package that bundles an optional dependency gets
   `{ "__aube_npm_bundled_optional": ... }` in its `bun.lock` metadata slot,
   which Bun never writes and drops on its next install. Fork fix in
   [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7).
   Follow-up for
   [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19186457).
 
-- [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with `aube
-  2.8.2 linux-x64 (2026-10-23)`): an unrelated `aube add` drops an existing
-  entry's `bundleDependencies`, so npm treats the bundled `tslib` as an
-  ordinary dependency and `npm ci` fails with `Missing: tslib@2.8.1 from lock
-  file`; a second fixture loses valid nested placements. Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821).
-  Fixed in fork `2.8.2+mwolson.1`.
-
-- [`npm-lock-optional-orphan`](npm-lock-optional-orphan) (observed with `aube
-  2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): an unrelated `aube add` drops an
-  existing nested optional entry that npm 11.6.2 keeps
-  (`@rolldown/binding-wasm32-wasi/node_modules/@emnapi/wasi-threads`, left
-  unreferenced after npm itself updated a shared dependency), and `npm ci`
-  then rejects the lockfile. npm's own add keeps the entry and its `ci`
-  passes. Found in a private npm 11.6.2 project. Fixed in fork
-  `2.8.2+mwolson.5`.
-  Upstream discussion:
-  [#1841 npm-lock-optional-orphan](https://github.com/aubepkg/aube/discussions/1841)
-
-- [`npm-lock-nested-peer-drop`](npm-lock-nested-peer-drop) (observed with
-  `aube 2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): with two installed copies
-  of `ajv`, an unrelated `aube add` removes `"peer": true` from the nested
-  `schema-utils/node_modules/ajv` copy. npm 11.6.2 keeps the flag. Fixed in
-  fork `2.8.2+mwolson.5`.
-  Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
-
-- [`npm-lock-nested-peer-add`](npm-lock-nested-peer-add) (observed with `aube
-  2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): two installed copies of
-  `picomatch` carry different peer flags; an unrelated `aube add` removes
-  `"peer": true` from tinyglobby's copy (an earlier fork build instead added
-  it to the ordinary copy). npm 11.6.2 keeps both copies as they were. Fixed
-  in fork `2.8.2+mwolson.5`.
-  Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
-
-- [`npm-lock-package-workspaces`](npm-lock-package-workspaces) (observed with
-  `aube 2.8.3 linux-x64 (2026-10-25)`, also 2.8.2): an unrelated `aube add`
-  removes the `workspaces` array that npm records on an installed package's
-  own entry (`vitefu`). npm 11.6.2 keeps it. Fixed in fork `2.8.2+mwolson.5`.
-  Follow-up for [#1821
-  npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19182143).
-
-- [`pnpm-lock-rewrite-metadata`](pnpm-lock-rewrite-metadata) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): `aube add` drops pnpm 12's
-  `settings.peersSuffixMaxLength`, so `pnpm install --frozen-lockfile` fails
-  with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, and loses local tarball
-  `version`/`integrity` and `bundledDependencies`. Fixed in fork
-  `2.8.2+mwolson.1`.
-  Upstream discussion:
-  [#1825 pnpm-lock-rewrite-metadata](https://github.com/aubepkg/aube/discussions/1825)
-
 - [`pnpm-lock-peer-cycle-shape`](pnpm-lock-peer-cycle-shape) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): an unrelated add contextualizes a
+  aube `2.8.2`, partly fixed in aube `2.8.4`): an unrelated add contextualized a
   cyclic peer provider that pnpm 11.10.0 and 12.14.0 keep bare, changing its
-  suffix hash, and collapses a retained optional-peer provider context.
-  Follow-up for [#1823
-  pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823).
+  suffix hash;
+  [#1859 peer-cycle-bare](https://github.com/aubepkg/aube/pull/1859)
+  fixes that. The provider fixture still fails: aube `2.8.4` collapses a retained optional-peer provider context,
+  losing `provider-consumer@1.0.0(provider-peer@2.0.0)`.
+  Follow-up for [#1823 pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823).
   Fixed in fork `2.8.2+mwolson.1`.
-
-- [`npm-workspace-local-dir-spec`](npm-workspace-local-dir-spec) (observed
-  with `aube 2.8.2 linux-x64 (2026-10-23)`): a fresh npm workspace install
-  writes `leaf: file+<hash>` for a local package's absolute `file:`
-  dependency, and aube's own frozen install then rejects the lockfile with
-  `manifest adds leaf@file:<path>`. npm 11.6.2 keeps the declared spec. Fixed
-  in fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1826 npm-workspace-local-dir-spec](https://github.com/aubepkg/aube/discussions/1826)
-
-- [`npm-linked-dir-tarball-child`](npm-linked-dir-tarball-child) (observed
-  with `aube 2.8.2 linux-x64 (2026-10-23)`): after a clean frozen install from
-  `package-lock.json`, a `file:`-linked directory cannot load its local
-  tarball dependency (`MODULE_NOT_FOUND`), although the install exits 0. npm
-  11.6.2 loads it after `npm ci`. Fixed in fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1827 npm-linked-dir-tarball-child](https://github.com/aubepkg/aube/discussions/1827)
-
-- [`bun-reload-member-peer`](bun-reload-member-peer) (observed with `aube
-  2.8.2 linux-x64 (2026-10-23)`): a clean frozen `bun.lock` install switches a
-  workspace member's consumer from the member's React 19 peer to root React
-  18. Bun 1.4.3 keeps 19.0.0. Fixed in fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1828 bun-reload-member-peer](https://github.com/aubepkg/aube/discussions/1828)
-
-- [`bun-native-relative-tarball`](bun-native-relative-tarball) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): a frozen import of a native `bun.lock`
-  resolves a member's hoisted `../../consumer.tgz` from the project root and
-  fails before linking. Bun 1.4.3 fresh and frozen installs pass. Fixed in
-  fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1829 bun-native-relative-tarball](https://github.com/aubepkg/aube/discussions/1829)
 
 - [`tarball-transitive-local-dep`](tarball-transitive-local-dep) (observed
-  with `aube 2.8.2 linux-x64 (2026-10-23)`): a local tarball's absolute
-  `file:` child fails fresh resolution (`cannot be resolved without the parent
-  package source root`) even with `block-exotic-subdeps=false`. pnpm 12.14.0,
-  npm 11.6.2 and Bun 1.4.3 accept it. Fixed in fork `2.8.2+mwolson.2`.
+  with aube `2.8.2`, partly fixed in aube `2.8.4`): a local tarball's absolute
+  `file:` child failed fresh resolution (`cannot be resolved without the parent
+  package source root`) even with `block-exotic-subdeps=false`; pnpm 12.14.0, npm
+  11.6.2 and Bun 1.4.3 accept it.
+  [#1852 tarball-absolute-children](https://github.com/aubepkg/aube/pull/1852)
+  fixes the fresh install, but a clean `aube install --frozen-lockfile` from the
+  lockfile aube just wrote still leaves `host` without its `child` link
+  (`Cannot find module 'child'`). Fixed in fork `2.8.2+mwolson.2`.
   Upstream discussion:
   [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830)
-
-- [`bun-lock-absolute-dir-ident`](bun-lock-absolute-dir-ident) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): once a tarball's absolute directory
-  child resolves, aube writes an absolute `bun.lock` folder identifier that
-  Bun 1.4.3 rejects as unsafe in a hoisted frozen install; upstream fails
-  earlier at the resolution step in `tarball-transitive-local-dep`. Fixed in
-  fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830)
-
-- [`npm-lock-absolute-dir-key`](npm-lock-absolute-dir-key) (observed with
-  `aube 2.8.2 linux-x64 (2026-10-23)`): an absolute `file:` directory
-  dependency gets its absolute path as the `package-lock.json` target key and
-  `resolved`, and `npm ci` fails with `EUSAGE`. npm 11.6.2 writes the
-  root-relative key. Fixed in fork `2.8.2+mwolson.2`.
-  Upstream discussion:
-  [#1831 npm-lock-absolute-dir-key](https://github.com/aubepkg/aube/discussions/1831)
-
-- [`lockfile-dir-workspace-importers`](lockfile-dir-workspace-importers)
-  (observed with `aube 2.8.2 linux-x64 (2026-10-23)`): a workspace using
-  `--lockfile-dir=locks` writes its lockfile, then its next frozen install
-  exits 11 because aube treats the `apps/app` member it just wrote as another
-  project; a native npm or Bun lockfile moved into `locks/` is rejected
-  because its implicit `.` root looks foreign. Native pnpm 12.14.0 passes the
-  workspace lifecycle. Fixed in fork `2.8.2+mwolson.3`.
-  Upstream discussion:
-  [#1832 lockfile-dir-workspace-importers](https://github.com/aubepkg/aube/discussions/1832)
 
 ## Intentional
 
@@ -290,6 +95,213 @@ migration notes; the repro still exits non-zero while the difference holds.
   Closed PR (not merged): https://github.com/jdx/aube/pull/1241
 
 ## Fixed
+
+- [`file-dep-peer-link-dangling`](file-dep-peer-link-dangling) (observed with aube `2.7.0`
+  through `2.8.2`, fixed in aube `2.8.4`): when a registry package's peer was
+  satisfied by a `file:` dependency, aube linked the peer under a name it never
+  created, so `require("react")` from `use-sync-external-store` failed in a
+  workspace member with and without the global virtual store. Aube `2.8.4` links
+  the directory it actually creates. Found in pingdotgg/t3code, where
+  `apps/mobile` failed typecheck under aube because
+  `@react-navigation/native-stack` could not resolve the `react-native-screens`
+  tarball.
+  Upstream discussion:
+  [#1819 file-dep-peer-link-dangling](https://github.com/aubepkg/aube/discussions/1819)
+  Upstream fix:
+  [#1850 file-peer-links](https://github.com/aubepkg/aube/pull/1850)
+
+- [`npm-lock-peer-entries`](npm-lock-peer-entries) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): `aube add` dropped or rewrote npm `package-lock.json` entries for
+  peer dependencies, so `npm ci` failed with
+  `Missing: react@19.3.1 from lock file` when `react` was only an auto-installed
+  peer of `react-dom`. Aube `2.8.4` keeps the existing entries and their
+  `"peer": true` flags. Found in a private React frontend, where a two-package
+  dev add changed 27 of 233 existing entries.
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`pnpm-lock-peer-suffix-shape`](pnpm-lock-peer-suffix-shape) (observed with aube `2.8.2`, fixed in
+  aube `2.8.4`): aube wrote different peer suffixes than pnpm for a peer aliased
+  to another package and for an out-of-range optional peer that was provided.
+  Aube `2.8.4` uses the aliased provider's registry name and includes the
+  provided optional peer. In pingdotgg/t3code one `aube add` in `apps/mobile`
+  used to rewrite about 1,300 lines of peer suffixes.
+  Upstream discussion:
+  [#1823 pnpm-lock-peer-suffix-shape](https://github.com/aubepkg/aube/discussions/1823)
+  Upstream fix:
+  [#1849 peer-suffix-rules](https://github.com/aubepkg/aube/pull/1849)
+
+- [`pnpm12-package-manager-document-drop`](pnpm12-package-manager-document-drop) (observed with aube `2.8.2`,
+  fixed in aube `2.8.4`): pnpm 12 writes `pnpm-lock.yaml` as two YAML documents
+  when `package.json` has a `packageManager` field, and `aube add` wrote only
+  the project document, so pnpm 12.14.0 `install --frozen-lockfile` failed with
+  `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`. Aube `2.8.4` keeps the
+  leading document. Found in pingdotgg/t3code.
+  Upstream discussion:
+  [#1822 pnpm12-package-manager-document-drop](https://github.com/aubepkg/aube/discussions/1822)
+  Upstream fix:
+  [#1842 pnpm-bootstrap-document](https://github.com/aubepkg/aube/pull/1842)
+
+- [`workspace-root-bin-path`](workspace-root-bin-path) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): `aube run` in a workspace member did not put the workspace root's
+  `node_modules/.bin` on the script's `PATH`, so a member script calling a root
+  command failed with `command not found`. pnpm documents and does this. Aube
+  `2.8.4` adds the root's `.bin` after the member's own. Found in
+  pingdotgg/t3code, where `apps/mobile`'s `test` script calls `vp` from the
+  root's `vite-plus`.
+  Upstream discussion:
+  [#1820 workspace-root-bin-path](https://github.com/aubepkg/aube/discussions/1820)
+  Upstream fix:
+  [#1845 root-bins-path](https://github.com/aubepkg/aube/pull/1845)
+
+- [`npm-lock-new-entry-libc`](npm-lock-new-entry-libc) (observed with aube `2.8.3`, fixed in aube
+  `2.8.4`): new `package-lock.json` entries always got `libc`, which npm 11.10.1
+  and older omit and strip again on their next write. Aube `2.8.4` writes it only
+  if the lockfile already uses it or `packageManager` is `npm@11.11.0` or later.
+  Upstream discussion:
+  [#1824 npm-lock-new-entry-install-script](https://github.com/aubepkg/aube/discussions/1824)
+  Upstream fix:
+  [#1874 npm-libc-rule](https://github.com/aubepkg/aube/pull/1874)
+
+- [`npm-lock-new-workspace-member`](npm-lock-new-workspace-member) (observed with aube `2.8.3`, fixed in
+  aube `2.8.4`): after a new member joined an npm workspace, `aube install` wrote
+  nothing for a member without dependencies (`npm ci`:
+  `Missing: b@1.0.0 from lock file`), and a member with dependencies got `name`
+  added and `os`/`cpu` left out compared with npm 11.6.2. Aube `2.8.4` records the
+  member and copies npm's entry shape.
+  Upstream discussion:
+  [#1875 npm-lock-new-workspace-member](https://github.com/aubepkg/aube/discussions/1875)
+  Upstream fix:
+  [#1876 npm-empty-members](https://github.com/aubepkg/aube/pull/1876)
+
+- [`npm-lock-bundled-entries`](npm-lock-bundled-entries) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): an unrelated `aube add` dropped an existing entry's
+  `bundleDependencies`, so npm treated the bundled `tslib` as an ordinary
+  dependency and `npm ci` failed with `Missing: tslib@2.8.1 from lock file`; a
+  second fixture lost valid nested placements.
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`npm-lock-optional-orphan`](npm-lock-optional-orphan) (observed with aube `2.8.2` and `2.8.3`,
+  fixed in aube `2.8.4`): an unrelated `aube add` dropped an existing nested
+  optional entry that npm 11.6.2 keeps
+  (`@rolldown/binding-wasm32-wasi/node_modules/@emnapi/wasi-threads`, left
+  unreferenced after npm itself updated a shared dependency), and `npm ci` then
+  rejected the lockfile. Found in a private npm 11.6.2 project.
+  Upstream discussion:
+  [#1841 npm-lock-optional-orphan](https://github.com/aubepkg/aube/discussions/1841)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`npm-lock-nested-peer-drop`](npm-lock-nested-peer-drop) (observed with aube `2.8.2` and `2.8.3`,
+  fixed in aube `2.8.4`): with two installed copies of `ajv`, an unrelated
+  `aube add` removed `"peer": true` from the nested
+  `schema-utils/node_modules/ajv` copy. npm 11.6.2 keeps the flag.
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`npm-lock-nested-peer-add`](npm-lock-nested-peer-add) (observed with aube `2.8.2` and `2.8.3`,
+  fixed in aube `2.8.4`): with two installed copies of `picomatch` carrying
+  different peer flags, an unrelated `aube add` removed `"peer": true` from
+  tinyglobby's copy. npm 11.6.2 keeps both copies as they were.
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`npm-lock-package-workspaces`](npm-lock-package-workspaces) (observed with aube `2.8.2` and `2.8.3`,
+  fixed in aube `2.8.4`): an unrelated `aube add` removed the `workspaces` array
+  that npm records on an installed package's own entry (`vitefu`). npm 11.6.2
+  keeps it.
+  Upstream discussion:
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821)
+  Upstream fix:
+  [#1851 npm-existing-entries](https://github.com/aubepkg/aube/pull/1851)
+
+- [`pnpm-lock-rewrite-metadata`](pnpm-lock-rewrite-metadata) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): `aube add` dropped pnpm 12's `settings.peersSuffixMaxLength`, so
+  `pnpm install --frozen-lockfile` failed with
+  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`, and lost local tarball
+  `version`/`integrity` and `bundledDependencies`.
+  Upstream discussion:
+  [#1825 pnpm-lock-rewrite-metadata](https://github.com/aubepkg/aube/discussions/1825)
+  Upstream fix:
+  [#1857 pnpm-rewrite-metadata](https://github.com/aubepkg/aube/pull/1857)
+
+- [`npm-workspace-local-dir-spec`](npm-workspace-local-dir-spec) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): a fresh npm workspace install wrote `leaf: file+<hash>` for a local
+  package's absolute `file:` dependency, and aube's own frozen install then
+  rejected the lockfile with `manifest adds leaf@file:<path>`. npm 11.6.2 keeps
+  the declared spec.
+  Upstream discussion:
+  [#1826 npm-workspace-local-dir-spec](https://github.com/aubepkg/aube/discussions/1826)
+  Upstream fix:
+  [#1855 npm-local-specs](https://github.com/aubepkg/aube/pull/1855)
+
+- [`npm-linked-dir-tarball-child`](npm-linked-dir-tarball-child) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): after a clean frozen install from `package-lock.json`, a
+  `file:`-linked directory could not load its local tarball dependency
+  (`MODULE_NOT_FOUND`), although the install exited 0. npm 11.6.2 loads it after
+  `npm ci`.
+  Upstream discussion:
+  [#1827 npm-linked-dir-tarball-child](https://github.com/aubepkg/aube/discussions/1827)
+  Upstream fix:
+  [#1848 linked-dir-deps](https://github.com/aubepkg/aube/pull/1848)
+
+- [`bun-reload-member-peer`](bun-reload-member-peer) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): a clean frozen `bun.lock` install switched a workspace member's
+  consumer from the member's React 19 peer to root React 18. Bun 1.4.3 keeps
+  19.0.0.
+  Upstream discussion:
+  [#1828 bun-reload-member-peer](https://github.com/aubepkg/aube/discussions/1828)
+  Upstream fix:
+  [#1847 bun-member-peers](https://github.com/aubepkg/aube/pull/1847)
+
+- [`bun-native-relative-tarball`](bun-native-relative-tarball) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): a frozen import of a native `bun.lock` resolved a member's hoisted
+  `../../consumer.tgz` from the project root and failed before linking. Bun 1.4.3
+  fresh and frozen installs pass.
+  Upstream discussion:
+  [#1829 bun-native-relative-tarball](https://github.com/aubepkg/aube/discussions/1829)
+  Upstream fix:
+  [#1844 bun-hoisted-tarballs](https://github.com/aubepkg/aube/pull/1844)
+
+- [`bun-lock-absolute-dir-ident`](bun-lock-absolute-dir-ident) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): once a tarball's absolute directory child resolved, aube wrote an
+  absolute `bun.lock` folder identifier that Bun 1.4.3 rejects as unsafe in a
+  hoisted frozen install. Aube `2.8.4` writes the identifier relative to the
+  lockfile. The rest of that discussion stays open as
+  [`tarball-transitive-local-dep`](tarball-transitive-local-dep).
+  Upstream discussion:
+  [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830)
+  Upstream fix:
+  [#1854 bun-folder-idents](https://github.com/aubepkg/aube/pull/1854)
+
+- [`npm-lock-absolute-dir-key`](npm-lock-absolute-dir-key) (observed with aube `2.8.2`, fixed in aube
+  `2.8.4`): an absolute `file:` directory dependency got its absolute path as the
+  `package-lock.json` target key and `resolved`, and `npm ci` failed with
+  `EUSAGE`. npm 11.6.2 writes the root-relative key.
+  Upstream discussion:
+  [#1831 npm-lock-absolute-dir-key](https://github.com/aubepkg/aube/discussions/1831)
+  Upstream fix:
+  [#1853 npm-absolute-keys](https://github.com/aubepkg/aube/pull/1853)
+
+- [`lockfile-dir-workspace-importers`](lockfile-dir-workspace-importers) (observed with aube `2.8.2`, fixed in
+  aube `2.8.4`): a workspace using `--lockfile-dir=locks` wrote its lockfile, then
+  its next frozen install exited 11 because aube treated the `apps/app` member it
+  had just written as another project; a native npm or Bun lockfile moved into
+  `locks/` was rejected because its implicit `.` root looked foreign. Native pnpm
+  12.14.0 passes the workspace lifecycle.
+  Upstream discussion:
+  [#1832 lockfile-dir-workspace-importers](https://github.com/aubepkg/aube/discussions/1832)
+  Upstream fix:
+  [#1856 lockfile-dir-workspaces](https://github.com/aubepkg/aube/pull/1856)
 
 - [`hidden-hoist-version-choice`](hidden-hoist-version-choice) (observed
   with aube `2.8.1`, fixed in aube `2.8.2`): when two versions of a package
