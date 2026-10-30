@@ -14,7 +14,9 @@ existing npm and Bun projects.
   `minimumReleaseAge` aube fetches the full packument, which has `scripts`
   instead. Fixed in fork `2.8.2+mwolson.1`.
   Upstream discussion:
-  [#1824 npm-lock-new-entry-install-script](https://github.com/aubepkg/aube/discussions/1824)
+  [#1887 default-settings-install-script](https://github.com/aubepkg/aube/discussions/1887)
+  (follow-up to
+  [#1824 npm-lock-new-entry-install-script](https://github.com/aubepkg/aube/discussions/1824))
 
 - [`npm-lock-symlinked-workspace-member`](npm-lock-symlinked-workspace-member)
   (observed with aube `2.8.3`, partly fixed in aube `2.8.4`): npm writes entries
@@ -37,8 +39,10 @@ existing npm and Bun projects.
   `{ "__aube_npm_bundled_optional": ... }` in its `bun.lock` metadata slot,
   which Bun never writes and drops on its next install. Fork fix in
   [#7 npm-lock-new-entry-metadata](https://github.com/mwolson/aube/pull/7).
-  Follow-up for
-  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821#discussioncomment-19186457).
+  Upstream discussion:
+  [#1889 bun-lock-npm-bundled-optional-meta](https://github.com/aubepkg/aube/discussions/1889)
+  (follow-up to
+  [#1821 npm-lock-peer-entries](https://github.com/aubepkg/aube/discussions/1821))
 
 - [`pnpm-lock-peer-cycle-shape`](pnpm-lock-peer-cycle-shape) (observed with
   aube `2.8.2`, partly fixed in aube `2.8.4`): an unrelated add contextualized a
@@ -60,7 +64,9 @@ existing npm and Bun projects.
   lockfile aube just wrote still leaves `host` without its `child` link
   (`Cannot find module 'child'`). Fixed in fork `2.8.2+mwolson.2`.
   Upstream discussion:
-  [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830)
+  [#1888 tarball-frozen-file-child](https://github.com/aubepkg/aube/discussions/1888)
+  (follow-up to
+  [#1830 tarball-transitive-local-dep](https://github.com/aubepkg/aube/discussions/1830))
 
 - [`npm-lock-frozen-member-drift`](npm-lock-frozen-member-drift) (observed with
   `aube 2.8.4 linux-x64 (2026-10-27)`): `aube install --frozen-lockfile` accepts
@@ -69,6 +75,8 @@ existing npm and Bun projects.
   a dependency-free member joins a project that uses `npm-shrinkwrap.json`.
   Fork fix in
   [#23 npm-lock-new-workspace-member](https://github.com/mwolson/aube/pull/23).
+  Upstream discussion:
+  [#1890 npm-lock-frozen-member-drift](https://github.com/aubepkg/aube/discussions/1890)
 
 ## Intentional
 
