@@ -153,6 +153,16 @@ existing npm and Bun projects.
   30 to 45 rounds of eleven concurrent installs on Linux, and a run without a
   failure does not prove the race is gone.
 
+- [`workspace-peer-provider-unwired`](workspace-peer-provider-unwired)
+  (observed with aube `2.10.0` and `2.10.0+mwolson.1`): on a fresh resolve, a
+  registry package whose required peer is provided by a `workspace:` dependency
+  gets no peer edge. With `strictPeerDependencies: true` the install fails with
+  `missing required peer react`; with it off the install succeeds, but the
+  package cannot resolve its peer at runtime. pnpm 12.14.0 wires the peer to
+  the workspace project (`use-sync-external-store@1.2.0(react@packages+react)`
+  with `react: link:packages/react`). Both lockfile names are affected, and a
+  lockfile aube wrote keeps the missing edge on later installs.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
