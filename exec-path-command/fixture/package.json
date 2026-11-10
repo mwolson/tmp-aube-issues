@@ -1,0 +1,1 @@
+{"name":"exec-root","private":true,"scripts":{"probe":"node -p process.version"}}

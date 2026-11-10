@@ -127,6 +127,32 @@ existing npm and Bun projects.
   [#30 pnpm-lock-optional-peer-suffix-drop](https://github.com/mwolson/aube/pull/30)
   (`2.10.0+mwolson.1`).
 
+- [`pnpm-lock-settings-config-mismatch`](pnpm-lock-settings-config-mismatch)
+  (observed with aube `2.10.0` and `2.10.0+mwolson.1`): aube leaves
+  configuration-derived settings out of a fresh `pnpm-lock.yaml`
+  (`injectWorkspacePackages`, `addMissingPeerTypes`, `dedupePeers`, a
+  nondefault `peersSuffixMaxLength`, and the four keys behind
+  `lockfile.includeResolutionSettings`), and keeps a stale value after the
+  configuration changes. pnpm 12.14.0 then rejects the lockfile on a frozen
+  install with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. The fork writes
+  `dedupePeers` and `peersSuffixMaxLength` correctly; the others fail there
+  too.
+
+- [`exec-path-command`](exec-path-command) (observed with aube `2.10.0` and
+  `2.10.0+mwolson.1`): `aube exec node -p process.version` and
+  `aube exec ls package.json` fail with `binary not found`, because `aube exec`
+  only runs binaries from `node_modules/.bin`. pnpm 12.14.0 and 11.10.0 run any
+  command on PATH with `.bin` prepended, including the `--`, `-r` and
+  `--filter` forms.
+
+- [`gvs-concurrent-link-race`](gvs-concurrent-link-race) (observed with aube
+  `2.10.0` and `2.10.0+mwolson.1`): separate projects installing at the same
+  moment against one global virtual store can fail with
+  `node_modules/is-number: File exists (os error 17)` while creating the
+  store's hidden-hoist links. A bounded stress case: it usually fails within
+  30 to 45 rounds of eleven concurrent installs on Linux, and a run without a
+  failure does not prove the race is gone.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
