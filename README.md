@@ -92,6 +92,8 @@ existing npm and Bun projects.
   rule, and upstream `2.10.0` never reports provided optional peers, so only the
   fork (which reports them as pnpm does) needed the rule. Fresh and
   `--frozen-lockfile` installs both fail.
+  Upstream discussion:
+  [#1936 pnpm-peer-rules-parent-selectors](https://github.com/aubepkg/aube/discussions/1936).
   Fork fix in
   [#27 pnpm-peer-rules-parent-selectors](https://github.com/mwolson/aube/pull/27)
   (`2.8.4+mwolson.2`; `2.10.0+mwolson.1` follows pnpm's two-stage check).
@@ -103,6 +105,8 @@ existing npm and Bun projects.
   (which is also how an LF patch applies to a CRLF file) and applies it. Seen in
   the wild after an editor stripped trailing whitespace from a committed
   `app-builder-lib` patch.
+  Upstream discussion:
+  [#1937 pnpm-patch-trailing-whitespace-context](https://github.com/aubepkg/aube/discussions/1937).
   Fork fix in
   [#28 pnpm-patch-trailing-whitespace-context](https://github.com/mwolson/aube/pull/28)
   (`2.8.4+mwolson.2`).
@@ -117,6 +121,8 @@ existing npm and Bun projects.
   accepts the rewritten lockfile, so the cost is lockfile churn: about 1,830
   lines in one real monorepo. Introduced by upstream #1920
   unused-optional-peers (`16f0f0ac`).
+  Upstream discussion:
+  [#1938 pnpm-lock-optional-peer-suffix-drop](https://github.com/aubepkg/aube/discussions/1938).
   Fork fix in
   [#30 pnpm-lock-optional-peer-suffix-drop](https://github.com/mwolson/aube/pull/30)
   (`2.10.0+mwolson.1`).
