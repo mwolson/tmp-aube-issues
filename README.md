@@ -94,7 +94,7 @@ existing npm and Bun projects.
   `--frozen-lockfile` installs both fail.
   Fork fix in
   [#27 pnpm-peer-rules-parent-selectors](https://github.com/mwolson/aube/pull/27)
-  (`2.8.4+mwolson.2`).
+  (`2.8.4+mwolson.2`; `2.10.0+mwolson.1` follows pnpm's two-stage check).
 
 - [`pnpm-patch-trailing-whitespace-context`](pnpm-patch-trailing-whitespace-context)
   (observed with aube `2.8.4+mwolson.1` and `2.10.0`): a patch whose context
@@ -117,6 +117,9 @@ existing npm and Bun projects.
   accepts the rewritten lockfile, so the cost is lockfile churn: about 1,830
   lines in one real monorepo. Introduced by upstream #1920
   unused-optional-peers (`16f0f0ac`).
+  Fork fix in
+  [#30 pnpm-lock-optional-peer-suffix-drop](https://github.com/mwolson/aube/pull/30)
+  (`2.10.0+mwolson.1`).
 
 ## Intentional
 
