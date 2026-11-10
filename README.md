@@ -89,6 +89,14 @@ existing npm and Bun projects.
   peers, so only the first rule fails there. Fresh and `--frozen-lockfile`
   installs both fail.
 
+- [`pnpm-patch-trailing-whitespace-context`](pnpm-patch-trailing-whitespace-context)
+  (observed with aube `2.8.4+mwolson.1` and `2.10.0`): a patch whose context
+  line lost the trailing space the package file has fails with `error applying
+  hunk #1`. pnpm 12.14.0 compares patch lines with trailing whitespace trimmed
+  (which is also how an LF patch applies to a CRLF file) and applies it. Seen in
+  the wild after an editor stripped trailing whitespace from a committed
+  `app-builder-lib` patch.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for

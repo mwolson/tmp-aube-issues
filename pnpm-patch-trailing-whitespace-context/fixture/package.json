@@ -1,0 +1,7 @@
+{
+  "name": "pnpm-patch-trailing-whitespace-context",
+  "private": true,
+  "dependencies": {
+    "is-number": "7.0.0"
+  }
+}

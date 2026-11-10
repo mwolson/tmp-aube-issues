@@ -1,0 +1,12 @@
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -164,7 +164,7 @@ You might also be interested in these projects:
+ 
+ | **Commits** | **Contributor** |
+ | --- | --- |
+-| 49 | [jonschlinkert](https://github.com/jonschlinkert) |
++| 49 | [jonschlinkert](https://github.com/jonschlinkert) (patched) |
+ | 5 | [charlike-old](https://github.com/charlike-old) |
+ | 1 | [benaadams](https://github.com/benaadams) |
+ | 1 | [realityking](https://github.com/realityking) |
