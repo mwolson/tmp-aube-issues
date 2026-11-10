@@ -80,14 +80,18 @@ existing npm and Bun projects.
 
 - [`pnpm-peer-rules-parent-selectors`](pnpm-peer-rules-parent-selectors)
   (observed with aube `2.8.4+mwolson.1` and `2.10.0`): with
-  `strictPeerDependencies: true`, aube ignores `peerDependencyRules.allowedVersions`
-  rules that pnpm 12.14.0 honors. `use-sync-external-store>react: "*"` does not
-  admit the prerelease `react@19.3.0-canary-...` (pnpm's `*` matches every
-  version, and pnpm checks peers with `includePrerelease`), and the fork, which
-  reports mismatched optional peers as pnpm does, also ignores the versioned
-  parent selector `ws@7>utf-8-validate: "6"`. Upstream `2.10.0` skips optional
-  peers, so only the first rule fails there. Fresh and `--frozen-lockfile`
-  installs both fail.
+  `strictPeerDependencies: true`, aube rejects installs that pnpm 12.14.0
+  accepts. The case runs three scenarios. A prerelease that falls inside the
+  declared peer range (`react@19.0.0-rc.1` for `^19.0.0`) is reported as unmet,
+  while pnpm's resolver retries a prerelease as its base release. A
+  `peerDependencyRules.allowedVersions` key of the form `parent@range>peer`
+  (`use-sync-external-store@1>react`) is ignored. And in a workspace-shaped
+  fixture, `use-sync-external-store>react: "*"` does not admit a prerelease
+  react. That fixture also has `ws@7>utf-8-validate: "6"` for a provided
+  optional peer that is out of range: pnpm rejects the install without that
+  rule, and upstream `2.10.0` never reports provided optional peers, so only the
+  fork (which reports them as pnpm does) needed the rule. Fresh and
+  `--frozen-lockfile` installs both fail.
   Fork fix in
   [#27 pnpm-peer-rules-parent-selectors](https://github.com/mwolson/aube/pull/27)
   (`2.8.4+mwolson.2`).
