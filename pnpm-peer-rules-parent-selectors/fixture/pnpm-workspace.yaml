@@ -1,0 +1,6 @@
+strictPeerDependencies: true
+
+peerDependencyRules:
+  allowedVersions:
+    use-sync-external-store>react: "*"
+    ws@7>utf-8-validate: "6"

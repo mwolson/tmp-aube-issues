@@ -1,0 +1,10 @@
+{
+  "name": "pnpm-peer-rules-parent-selectors",
+  "private": true,
+  "dependencies": {
+    "react": "19.3.0-canary-4ae637b6-20261109",
+    "use-sync-external-store": "1.7.0",
+    "utf-8-validate": "6.0.6",
+    "ws": "7.5.11"
+  }
+}

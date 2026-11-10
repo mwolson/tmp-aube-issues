@@ -78,6 +78,17 @@ existing npm and Bun projects.
   Upstream discussion:
   [#1890 npm-lock-frozen-member-drift](https://github.com/aubepkg/aube/discussions/1890)
 
+- [`pnpm-peer-rules-parent-selectors`](pnpm-peer-rules-parent-selectors)
+  (observed with aube `2.8.4+mwolson.1` and `2.10.0`): with
+  `strictPeerDependencies: true`, aube ignores `peerDependencyRules.allowedVersions`
+  rules that pnpm 12.14.0 honors. `use-sync-external-store>react: "*"` does not
+  admit the prerelease `react@19.3.0-canary-...` (pnpm's `*` matches every
+  version, and pnpm checks peers with `includePrerelease`), and the fork, which
+  reports mismatched optional peers as pnpm does, also ignores the versioned
+  parent selector `ws@7>utf-8-validate: "6"`. Upstream `2.10.0` skips optional
+  peers, so only the first rule fails there. Fresh and `--frozen-lockfile`
+  installs both fail.
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
