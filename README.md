@@ -88,6 +88,9 @@ existing npm and Bun projects.
   parent selector `ws@7>utf-8-validate: "6"`. Upstream `2.10.0` skips optional
   peers, so only the first rule fails there. Fresh and `--frozen-lockfile`
   installs both fail.
+  Fork fix in
+  [#27 pnpm-peer-rules-parent-selectors](https://github.com/mwolson/aube/pull/27)
+  (`2.8.4+mwolson.2`).
 
 - [`pnpm-patch-trailing-whitespace-context`](pnpm-patch-trailing-whitespace-context)
   (observed with aube `2.8.4+mwolson.1` and `2.10.0`): a patch whose context
@@ -96,6 +99,9 @@ existing npm and Bun projects.
   (which is also how an LF patch applies to a CRLF file) and applies it. Seen in
   the wild after an editor stripped trailing whitespace from a committed
   `app-builder-lib` patch.
+  Fork fix in
+  [#28 pnpm-patch-trailing-whitespace-context](https://github.com/mwolson/aube/pull/28)
+  (`2.8.4+mwolson.2`).
 
 ## Intentional
 
