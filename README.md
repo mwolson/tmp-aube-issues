@@ -107,6 +107,17 @@ existing npm and Bun projects.
   [#28 pnpm-patch-trailing-whitespace-context](https://github.com/mwolson/aube/pull/28)
   (`2.8.4+mwolson.2`).
 
+- [`pnpm-lock-optional-peer-suffix-drop`](pnpm-lock-optional-peer-suffix-drop)
+  (observed with aube `2.10.0`; `2.9.0`, `2.8.5` and fork `2.8.4+mwolson.2`
+  pass): an unrelated `aube add is-number@7.0.0` drops an optional peer binding
+  that the lockfile already had. The fixture has `fdir@6.5.0(picomatch@4.0.4)`
+  with `picomatch` kept only as an optional-only provider, the state pnpm
+  12.14.0 leaves after `pnpm remove picomatch`. pnpm keeps the provider and the
+  suffix on a later unrelated add; aube `2.10.0` removes both. pnpm still
+  accepts the rewritten lockfile, so the cost is lockfile churn: about 1,830
+  lines in one real monorepo. Introduced by upstream #1920
+  unused-optional-peers (`16f0f0ac`).
+
 ## Intentional
 
 Confirmed aube design differences from pnpm (or other managers). Kept for
