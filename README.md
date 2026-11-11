@@ -164,8 +164,8 @@ existing npm and Bun projects.
   lockfile aube wrote keeps the missing edge on later installs.
 
 - [`remove-workspace-member-dep`](remove-workspace-member-dep) (observed with
-  aube `2.10.0` and `2.10.0+mwolson.1`, and with `2.8.4`): `aube remove <pkg>`
-  run inside a workspace member fails with
+  aube `2.10.0` and `2.10.0+mwolson.1`, also present in `2.6.1`):
+  `aube remove <pkg>` run inside a workspace member fails with
   `no version of lib matches range workspace:*` when that member also has a
   `workspace:` dependency. No peers are involved. `package.json` is already
   edited when the command fails, so the manifest and `pnpm-lock.yaml` disagree
