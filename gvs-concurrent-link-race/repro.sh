@@ -127,7 +127,9 @@ try:
             race = False
             for directory, status, text in failures:
                 print(f'round {number}, exit {status}: {directory}/install.log\n{text}', flush=True)
-                if 'File exists (os error 17)' in text and 'virtual-store' in text:
+                # aube wraps long error lines, so match with whitespace removed.
+                squashed = ''.join(text.split())
+                if 'Fileexists(oserror17)' in squashed and 'virtual-store' in squashed:
                     race = True
                 else:
                     raise RuntimeError('unexpected install failure; see log above')
