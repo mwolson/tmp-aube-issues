@@ -161,7 +161,10 @@ existing npm and Bun projects.
   package cannot resolve its peer at runtime. pnpm 12.14.0 wires the peer to
   the workspace project (`use-sync-external-store@1.2.0(react@packages+react)`
   with `react: link:packages/react`). Both lockfile names are affected, and a
-  lockfile aube wrote keeps the missing edge on later installs.
+  lockfile aube wrote keeps the missing edge on later installs. Starting from
+  pnpm's lockfile, which records that edge, `aube add` in the app fails with
+  `no version of react matches range link+...`, and `aube update` drops the
+  edge.
 
 - [`remove-workspace-member-dep`](remove-workspace-member-dep) (observed with
   aube `2.10.0` and `2.10.0+mwolson.1`, also present in `2.6.1`):

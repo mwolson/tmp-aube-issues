@@ -4,6 +4,8 @@ set -euo pipefail
 # A workspace: direct dependency must provide a registry dependency's peer.
 # Check fresh strict/non-strict resolves, snapshot edges and runtime links,
 # both lockfile filenames, and reuse of the written and pnpm control locks.
+# Then re-resolve from pnpm's lockfile, which records the peer edge as a link:
+# `aube add` and `aube update` in the app must succeed and keep that edge.
 AUBE_BIN="${AUBE_BIN:-aube}"
 PNPM_BIN="${PNPM_BIN:-pnpm}"
 for cmd in "$AUBE_BIN" "$PNPM_BIN" node python3; do
@@ -73,6 +75,27 @@ main() {
                 failed=1
             fi
         done
+        for op in add update; do
+            local native="$work/pnpm-reresolve-$strict-$op"
+            prepare "$native" "$strict"
+            cp "$control/pnpm-lock.yaml" "$native/"
+            if ! reresolve "$native" "$PNPM_BIN" "$op" || ! snapshot "$native/pnpm-lock.yaml" "$native/snapshot"; then
+                echo "pnpm control failed: $native" >&2
+                exit 2
+            fi
+            local re="$work/aube-reresolve-$strict-$op"
+            prepare "$re" "$strict"
+            cp "$control/pnpm-lock.yaml" "$re/"
+            if ! reresolve "$re" "$AUBE_BIN" "$op"; then
+                echo "aube $op failed on pnpm's lockfile: ${re##*/} ($(grep -m1 -oE 'no version of .*|missing required peer .*|expected peer .*' "$re/$op.log" || echo "see $op.log"))"
+                failed=1
+            elif ! snapshot "$re/pnpm-lock.yaml" "$re/snapshot" || ! diff -u "$native/snapshot" "$re/snapshot" >"$re/snapshot.diff"; then
+                echo "aube $op changed the peer snapshot pnpm keeps: ${re##*/}"
+                failed=1
+            else
+                echo "aube pass: ${re##*/}"
+            fi
+        done
     done
     [[ -z "$failed" ]] || exit 1
     echo "pass: workspace peer bindings match pnpm"
@@ -94,6 +117,13 @@ install() {
     local dir=$1 bin=$2
     shift 2
     (cd "$dir" && "$bin" install --ignore-scripts "$@") >"$dir/install.log" 2>&1
+}
+
+reresolve() {
+    local dir=$1 bin=$2 op=$3
+    local args=(update)
+    [[ "$op" == add ]] && args=(add ms@2.1.3)
+    (cd "$dir/packages/app" && "$bin" "${args[@]}" --ignore-scripts) >"$dir/$op.log" 2>&1
 }
 
 runtime() {
