@@ -1,10 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-# `aube remove <pkg>` run inside a workspace member fails when that member
-# also has a `workspace:` dependency. The member has no peers; the trigger is
-# only the sibling dependency. pnpm 12.14.0 is the control, and a member with
-# no `workspace:` dependency is the control for the trigger.
+# `aube remove <pkg>` run inside a workspace member:
+#
+#   1. fails when that member also has a `workspace:` dependency. The member
+#      has no peers; the trigger is only the sibling dependency.
+#   2. without the `workspace:` dependency it succeeds, but leaves a
+#      single-project `aube-lock.yaml` inside the member next to the shared
+#      root lockfile.
+#
+# pnpm 12.14.0 is the control for both.
 
 AUBE_BIN="${AUBE_BIN:-aube}"
 PNPM_BIN="${PNPM_BIN:-pnpm}"
@@ -55,6 +60,10 @@ main() {
         echo "control failed: pnpm left picocolors behind" >&2
         exit 2
     fi
+    if [[ -n "$(member_lockfiles "$work/pnpm")" ]]; then
+        echo "control failed: pnpm wrote a lockfile inside the member" >&2
+        exit 2
+    fi
     echo "pnpm remove picocolors in packages/app: ok"
 
     echo "1. member with a workspace: dependency"
@@ -64,7 +73,7 @@ main() {
         status=1
     fi
 
-    echo "2. same member without the workspace: dependency (trigger control)"
+    echo "2. same member without the workspace: dependency"
     cp -r "$work/seed" "$work/plain-seed"
     node -e '
 const fs = require("fs");
@@ -98,6 +107,12 @@ aube_remove() {
     if (cd "$dir/packages/app" && "$AUBE_BIN" remove picocolors >"$dir-remove.log" 2>&1); then
         if removed "$dir"; then
             echo "   aube remove picocolors in packages/app: ok"
+            local stray
+            stray=$(member_lockfiles "$dir")
+            if [[ -n "$stray" ]]; then
+                echo "   aube left a member lockfile behind: $stray"
+                status=1
+            fi
         else
             echo "   aube remove picocolors in packages/app: exit 0, but picocolors remains"
             status=1
@@ -110,6 +125,10 @@ aube_remove() {
         fi
         status=1
     fi
+}
+
+member_lockfiles() {
+    (cd "$1" && ls packages/app/aube-lock.yaml packages/app/pnpm-lock.yaml 2>/dev/null | tr '\n' ' ' | sed 's/ $//') || true
 }
 
 removed() {

@@ -169,8 +169,9 @@ existing npm and Bun projects.
   `no version of lib matches range workspace:*` when that member also has a
   `workspace:` dependency. No peers are involved. `package.json` is already
   edited when the command fails, so the manifest and `pnpm-lock.yaml` disagree
-  afterwards. The same member without the `workspace:` dependency removes
-  cleanly, and pnpm 12.14.0 handles both.
+  afterwards. Without the `workspace:` dependency the removal succeeds but
+  leaves a single-project `aube-lock.yaml` inside the member, next to the
+  shared root lockfile. pnpm 12.14.0 does neither.
 
 ## Intentional
 
