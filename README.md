@@ -173,7 +173,9 @@ existing npm and Bun projects.
   leaves a single-project `aube-lock.yaml` inside the member, next to the
   shared root lockfile. Run at the workspace root, the removal re-resolves
   every member, so a member's `ms: ^2.0.0` locked at 2.0.0 moves to 2.1.3.
-  pnpm 12.14.0 does none of these.
+  pnpm 12.14.0 does none of these. Fork fix in
+  [#32 remove-workspace-member-dep](https://github.com/mwolson/aube/pull/32)
+  (`2.10.0+mwolson.2`).
 
 ## Intentional
 
