@@ -137,6 +137,8 @@ existing npm and Bun projects.
   install with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`. The fork writes
   `dedupePeers` and `peersSuffixMaxLength` correctly; the others fail there
   too.
+  Upstream discussion:
+  [#1946 pnpm-lock-settings-config-mismatch](https://github.com/aubepkg/aube/discussions/1946).
 
 - [`exec-path-command`](exec-path-command) (observed with aube `2.10.0` and
   `2.10.0+mwolson.1`): `aube exec node -p process.version` and
@@ -144,6 +146,8 @@ existing npm and Bun projects.
   only runs binaries from `node_modules/.bin`. pnpm 12.14.0 and 11.10.0 run any
   command on PATH with `.bin` prepended, including the `--`, `-r` and
   `--filter` forms.
+  Upstream discussion:
+  [#1947 exec-path-command](https://github.com/aubepkg/aube/discussions/1947).
 
 - [`gvs-concurrent-link-race`](gvs-concurrent-link-race) (observed with aube
   `2.10.0` and `2.10.0+mwolson.1`): separate projects installing at the same
@@ -152,6 +156,8 @@ existing npm and Bun projects.
   store's hidden-hoist links. A bounded stress case: it usually fails within
   30 to 45 rounds of eleven concurrent installs on Linux, and a run without a
   failure does not prove the race is gone.
+  Upstream discussion:
+  [#1948 gvs-concurrent-link-race](https://github.com/aubepkg/aube/discussions/1948).
 
 - [`workspace-peer-provider-unwired`](workspace-peer-provider-unwired)
   (observed with aube `2.10.0` and `2.10.0+mwolson.1`): on a fresh resolve, a
@@ -165,6 +171,8 @@ existing npm and Bun projects.
   pnpm's lockfile, which records that edge, `aube add` in the app fails with
   `no version of react matches range link+...`, and `aube update` drops the
   edge.
+  Upstream discussion:
+  [#1945 workspace-peer-provider-unwired](https://github.com/aubepkg/aube/discussions/1945).
 
 - [`remove-workspace-member-dep`](remove-workspace-member-dep) (observed with
   aube `2.10.0` and `2.10.0+mwolson.1`, also present in `2.6.1`):
@@ -176,7 +184,9 @@ existing npm and Bun projects.
   leaves a single-project `aube-lock.yaml` inside the member, next to the
   shared root lockfile. Run at the workspace root, the removal re-resolves
   every member, so a member's `ms: ^2.0.0` locked at 2.0.0 moves to 2.1.3.
-  pnpm 12.14.0 does none of these. Fork fix in
+  pnpm 12.14.0 does none of these. Upstream discussion:
+  [#1944 remove-workspace-member-dep](https://github.com/aubepkg/aube/discussions/1944).
+  Fork fix in
   [#32 remove-workspace-member-dep](https://github.com/mwolson/aube/pull/32)
   (`2.10.0+mwolson.2`).
 
