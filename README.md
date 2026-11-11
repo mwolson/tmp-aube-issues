@@ -171,7 +171,9 @@ existing npm and Bun projects.
   edited when the command fails, so the manifest and `pnpm-lock.yaml` disagree
   afterwards. Without the `workspace:` dependency the removal succeeds but
   leaves a single-project `aube-lock.yaml` inside the member, next to the
-  shared root lockfile. pnpm 12.14.0 does neither.
+  shared root lockfile. Run at the workspace root, the removal re-resolves
+  every member, so a member's `ms: ^2.0.0` locked at 2.0.0 moves to 2.1.3.
+  pnpm 12.14.0 does none of these.
 
 ## Intentional
 

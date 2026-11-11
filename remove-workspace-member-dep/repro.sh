@@ -9,7 +9,12 @@ set -euo pipefail
 #      single-project `aube-lock.yaml` inside the member next to the shared
 #      root lockfile.
 #
-# pnpm 12.14.0 is the control for both.
+# And run at the workspace root:
+#
+#   3. it re-resolves every member, so a member's locked version moves to the
+#      newest one its range allows (`ms: ^2.0.0` locked at 2.0.0 becomes 2.1.3).
+#
+# pnpm 12.14.0 is the control for all three.
 
 AUBE_BIN="${AUBE_BIN:-aube}"
 PNPM_BIN="${PNPM_BIN:-pnpm}"
@@ -89,11 +94,77 @@ fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + "\n");
     rm -rf "$work/plain-seed/node_modules" "$work/plain-seed/packages/app/node_modules"
     aube_remove "$work/plain-seed" "$work/aube-plain"
 
+    echo "3. removal at the workspace root"
+    root_removal
+
     if [[ $status -ne 0 ]]; then
-        echo "failed: aube remove does not work in a workspace member (pnpm does)" >&2
+        echo "failed: aube remove misbehaves in a shared-lockfile workspace (pnpm does not)" >&2
         exit 1
     fi
-    echo "pass: aube remove works in a workspace member"
+    echo "pass: aube remove works in a shared-lockfile workspace"
+}
+
+root_removal() {
+    local seed="$work/root-seed"
+    cp -r fixture "$seed"
+    node -e '
+const fs = require("fs");
+const write = (file, edit) => {
+    const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+    edit(manifest);
+    fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + "\n");
+};
+const [seed, range] = process.argv.slice(1);
+write(seed + "/package.json", (m) => { m.dependencies = { picocolors: "1.1.1" }; });
+write(seed + "/packages/app/package.json", (m) => { m.dependencies = { ms: range }; });
+' "$seed" "2.0.0"
+    if ! (cd "$seed" && "$PNPM_BIN" install --ignore-scripts >"$work/root-seed.log" 2>&1); then
+        echo "control failed: pnpm install for the root removal" >&2
+        exit 2
+    fi
+    rm -rf "$seed/node_modules" "$seed/packages/app/node_modules"
+    # Widen the member range in the manifest and the lockfile together, so the
+    # lockfile is current and still pins ms@2.0.0.
+    node -e '
+const fs = require("fs");
+const seed = process.argv[1];
+const file = seed + "/packages/app/package.json";
+const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+manifest.dependencies.ms = "^2.0.0";
+fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + "\n");
+const lock = seed + "/pnpm-lock.yaml";
+fs.writeFileSync(lock, fs.readFileSync(lock, "utf8").replace("specifier: 2.0.0", "specifier: ^2.0.0"));
+' "$seed"
+
+    cp -r "$seed" "$work/root-pnpm"
+    if ! (cd "$work/root-pnpm" && "$PNPM_BIN" remove picocolors >"$work/root-pnpm-remove.log" 2>&1); then
+        echo "control failed: pnpm remove picocolors at the root (see $work/root-pnpm-remove.log)" >&2
+        exit 2
+    fi
+    if ! grep -q 'ms@2.0.0' "$work/root-pnpm/pnpm-lock.yaml" || grep -q 'picocolors' "$work/root-pnpm/pnpm-lock.yaml"; then
+        echo "control failed: pnpm did not keep ms@2.0.0 or left picocolors behind" >&2
+        exit 2
+    fi
+    echo "   pnpm remove picocolors at the root: ok, member keeps ms@2.0.0"
+
+    local dir="$work/root-aube"
+    cp -r "$seed" "$dir"
+    if ! (cd "$dir" && "$AUBE_BIN" install --ignore-scripts >"$dir-install.log" 2>&1); then
+        echo "   aube install: failed (see $dir-install.log)"
+        status=1
+        return
+    fi
+    if ! (cd "$dir" && "$AUBE_BIN" remove picocolors >"$dir-remove.log" 2>&1); then
+        echo "   aube remove picocolors at the root: failed (see $dir-remove.log)"
+        status=1
+        return
+    fi
+    if grep -q 'ms@2.0.0' "$dir/pnpm-lock.yaml"; then
+        echo "   aube remove picocolors at the root: ok, member keeps ms@2.0.0"
+    else
+        echo "   aube remove picocolors at the root: member moved to $(grep -oE 'ms@[0-9.]+' "$dir/pnpm-lock.yaml" | sort -u | tr '\n' ' ')"
+        status=1
+    fi
 }
 
 aube_remove() {
